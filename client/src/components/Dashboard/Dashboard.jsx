@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers } from "lucide-react"
+import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers, Radio } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from "recharts"
 import TransactionTable from "./TransactionTable"
 import TransactionModal from "./TransactionModal"
 import QuickAddCommand from "./QuickAddCommand"
 import FinancialHealthCard from "./FinancialHealthCard"
 import CategoryEnvelopesModal from "./CategoryEnvelopesModal"
+import SubscriptionRadarModal from "./SubscriptionRadarModal"
 import AnimatedCounter from "../ui/AnimatedCounter"
 import axios from "../../api/axios"
 
@@ -77,6 +78,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEnvelopeModalOpen, setIsEnvelopeModalOpen] = useState(false)
+  const [isSubscriptionRadarOpen, setIsSubscriptionRadarOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(null)
   
@@ -381,6 +383,9 @@ export default function Dashboard() {
 
   const savingsRate = totalIncome > 0 ? Number((((totalIncome - totalExpense) / totalIncome) * 100).toFixed(1)) : 0
   const incomeShare = (totalIncome + totalExpense) > 0 ? (totalIncome / (totalIncome + totalExpense)) * 100 : 50
+  const recurringCount = useMemo(() => {
+    return Array.isArray(displayExpenses) ? displayExpenses.filter(e => e.isRecurring && e.type === 'expense').length : 0
+  }, [displayExpenses])
 
   return (
     <motion.div 
@@ -455,6 +460,23 @@ export default function Dashboard() {
               <kbd className="ml-1 px-1.5 py-0.5 rounded bg-slate-800/90 border border-slate-700/80 font-mono text-[10px] text-slate-300 shadow-sm">
                 ⌘K
               </kbd>
+            </Button>
+          </motion.div>
+
+          {/* Subscription & Bill Radar Trigger */}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              onClick={() => setIsSubscriptionRadarOpen(true)} 
+              variant="outline" 
+              className="border-purple-500/30 bg-slate-900/60 hover:bg-purple-500/15 text-purple-300 hover:text-purple-200 hover:border-purple-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
+            >
+              <Radio className="h-4 w-4 text-purple-400 group-hover:animate-pulse" />
+              <span>Bill Radar</span>
+              {recurringCount > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-[10px] font-bold border border-purple-500/40">
+                  {recurringCount}
+                </span>
+              )}
             </Button>
           </motion.div>
 
@@ -934,6 +956,15 @@ export default function Dashboard() {
         multiplier={multiplier}
         categoryBudgets={categoryBudgets}
         onUpdateCategoryBudget={handleUpdateCategoryBudget}
+      />
+
+      <SubscriptionRadarModal
+        isOpen={isSubscriptionRadarOpen}
+        onClose={() => setIsSubscriptionRadarOpen(false)}
+        expenses={displayExpenses}
+        currencySymbol={currSym}
+        multiplier={multiplier}
+        onOpenAddModal={openAddModal}
       />
     </motion.div>
   )
