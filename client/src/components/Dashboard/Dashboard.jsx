@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers, Radio } from "lucide-react"
+import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers, Radio, User, LogOut, ChevronDown } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from "recharts"
 import TransactionTable from "./TransactionTable"
 import TransactionModal from "./TransactionModal"
@@ -56,6 +57,23 @@ const DEMO_TRANSACTIONS = [
 ]
 
 export default function Dashboard() {
+  const navigate = useNavigate()
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("user")
+        if (saved) return JSON.parse(saved)
+      } catch (e) {}
+    }
+    return { name: "Personal Ledger", email: "guest@expenseflow.app", isGuest: true }
+  })
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    navigate("/login")
+  }
+
   const [expenses, setExpenses] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -548,6 +566,58 @@ export default function Dashboard() {
               New Transaction
             </Button>
           </motion.div>
+
+          {/* User Profile & Session Pill */}
+          <div className="relative">
+            <button
+              onClick={() => setIsUserMenuOpen(prev => !prev)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800/80 border border-white/[0.08] backdrop-blur-xl shadow-lg transition-all cursor-pointer"
+            >
+              <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-[10px] font-extrabold text-white uppercase shadow-sm">
+                {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : "PL"}
+              </div>
+              <span className="text-xs font-semibold text-slate-200 hidden sm:inline max-w-[90px] truncate">
+                {currentUser?.name || "Account"}
+              </span>
+              <ChevronDown className="h-3 w-3 text-slate-400" />
+            </button>
+
+            <AnimatePresence>
+              {isUserMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-52 rounded-2xl bg-slate-900/95 border border-white/[0.1] shadow-2xl backdrop-blur-2xl p-2 z-50 space-y-1"
+                >
+                  <div className="px-3 py-2 border-b border-white/[0.06]">
+                    <p className="text-xs font-bold text-white truncate">{currentUser?.name || "Explorer"}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{currentUser?.email || "Active Session"}</p>
+                    {currentUser?.isGuest && (
+                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[9px] font-bold">
+                        Demo Mode
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="w-full px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <User className="h-3.5 w-3.5 text-indigo-400" />
+                    <span>{currentUser?.isGuest ? "Sign In / Register" : "Switch Account"}</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-3 py-2 rounded-xl text-left text-xs font-medium text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 flex items-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       </div>
 
