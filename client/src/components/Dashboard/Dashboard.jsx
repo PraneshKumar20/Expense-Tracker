@@ -2,12 +2,13 @@ import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command } from "lucide-react"
+import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from "recharts"
 import TransactionTable from "./TransactionTable"
 import TransactionModal from "./TransactionModal"
 import QuickAddCommand from "./QuickAddCommand"
 import FinancialHealthCard from "./FinancialHealthCard"
+import CategoryEnvelopesModal from "./CategoryEnvelopesModal"
 import AnimatedCounter from "../ui/AnimatedCounter"
 import axios from "../../api/axios"
 
@@ -75,9 +76,39 @@ export default function Dashboard() {
   })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+  const [isEnvelopeModalOpen, setIsEnvelopeModalOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(null)
   
+  // Category Budget Envelopes State (Persisted)
+  const [categoryBudgets, setCategoryBudgets] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("category_budgets")
+        if (saved) return JSON.parse(saved)
+      } catch (e) {}
+    }
+    return {
+      Food: 450,
+      Travel: 250,
+      Bills: 350,
+      Subscriptions: 100,
+      Entertainment: 150,
+      Shopping: 200,
+      Other: 150
+    }
+  })
+
+  const handleUpdateCategoryBudget = (category, limit) => {
+    setCategoryBudgets(prev => {
+      const next = { ...prev, [category]: limit }
+      try {
+        localStorage.setItem("category_budgets", JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+  }
+
   // Advanced Features State
   const [budgetLimit, setBudgetLimit] = useState(3000)
   const [currency, setCurrency] = useState("USD")
@@ -546,7 +577,17 @@ export default function Dashboard() {
           <Card className="bento-card h-full relative overflow-hidden flex flex-col justify-between">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                <span>Budget Usage</span>
+                <div className="flex items-center gap-2">
+                  <span>Budget Usage</span>
+                  <button
+                    onClick={() => setIsEnvelopeModalOpen(true)}
+                    className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-all flex items-center gap-1 cursor-pointer"
+                    title="Manage Category Envelopes"
+                  >
+                    <Layers className="h-3 w-3" />
+                    Envelopes
+                  </button>
+                </div>
                 <div className={`p-2 rounded-xl border ${budgetPercent > 90 ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-slate-800/60 border-slate-700/50 text-slate-300'}`}>
                   {budgetPercent > 90 ? <ShieldAlert className="h-5 w-5 animate-pulse" /> : <Target className="h-5 w-5 opacity-70" />}
                 </div>
@@ -883,6 +924,16 @@ export default function Dashboard() {
         onClose={() => setIsQuickAddOpen(false)}
         onSave={handleSaveTransaction}
         currencySymbol={currSym}
+      />
+
+      <CategoryEnvelopesModal
+        isOpen={isEnvelopeModalOpen}
+        onClose={() => setIsEnvelopeModalOpen(false)}
+        expenses={displayExpenses}
+        currencySymbol={currSym}
+        multiplier={multiplier}
+        categoryBudgets={categoryBudgets}
+        onUpdateCategoryBudget={handleUpdateCategoryBudget}
       />
     </motion.div>
   )
