@@ -1,0 +1,27 @@
+{
+  "name": "expensetracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run server --prefix server\" \"npm run dev --prefix client\"",
+    "dev:server": "npm run server --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "install:all": "npm install --prefix server && npm install --prefix client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PraneshKumar20/Expense-Tracker-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PraneshKumar20/Expense-Tracker-Project/issues"
+  },
+  "homepage": "https://github.com/PraneshKumar20/Expense-Tracker-Project#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    --radius: 0.75rem;
+    
+    /* Custom Neon Colors */
+    --neon-blue: 217.2 91.2% 59.8%;
+    --neon-purple: 270 100% 60%;
+    --neon-green: 142 71% 45%;
+    --neon-red: 0 84% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: #030712;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.08);
+  }
+  66% {
+    transform: translate(-25px, 20px) scale(0.95);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(-35px, 35px) scale(1.05);
+  }
+  66% {
+    transform: translate(25px, -30px) scale(0.92);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    filter: blur(80px);
+  }
+  50% {
+    opacity: 0.75;
+    filter: blur(100px);
+  }
+}
+
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@keyframes stripesMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes borderGlowLoop {
+  0%, 100% {
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.15);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.45);
+    box-shadow: 0 0 30px -3px rgba(168, 85, 247, 0.25);
+  }
+}
+
+/* Glassmorphism & Premium utilities */
+@layer utilities {
+  .glass {
+    @apply bg-slate-900/40 backdrop-blur-md border border-slate-800/50 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
+  }
+  
+  .bento-card {
+    @apply bg-slate-900/50 backdrop-blur-2xl border border-white/[0.07] shadow-xl rounded-2xl transition-all duration-300 overflow-hidden relative;
+  }
+
+  .bento-card:hover {
+    @apply border-indigo-500/40 shadow-2xl shadow-indigo-500/10;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400;
+  }
+
+  .text-gradient-emerald {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-teal-400;
+  }
+
+  .text-gradient-rose {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-pink-400;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 18s ease-in-out infinite;
+  }
+
+  .animate-float-reverse {
+    animation: floatReverse 22s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 6s ease-in-out infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmerSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .cyber-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 80%);
+  }
+
+  .bar-stripes-animated {
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 20px 20px;
+    animation: stripesMove 1.5s linear infinite;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full hover:bg-slate-700;
+  }
+}
