@@ -68,8 +68,8 @@ An enterprise-grade, high-performance personal finance command center engineered
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/PraneshKumar20/ExpenseTracker.git
-cd ExpenseTracker
+git clone https://github.com/PraneshKumar20/Expense-Tracker.git
+cd Expense-Tracker
 ```
 
 ### 2. Install Dependencies

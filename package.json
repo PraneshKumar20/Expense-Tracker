@@ -11,16 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PraneshKumar20/Expense-Tracker-Project.git"
+    "url": "git+https://github.com/PraneshKumar20/Expense-Tracker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/PraneshKumar20/Expense-Tracker-Project/issues"
+    "url": "https://github.com/PraneshKumar20/Expense-Tracker/issues"
   },
-  "homepage": "https://github.com/PraneshKumar20/Expense-Tracker-Project#readme",
+  "homepage": "https://github.com/PraneshKumar20/Expense-Tracker#readme",
   "devDependencies": {
     "concurrently": "^10.0.5"
   }
