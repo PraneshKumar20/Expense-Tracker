@@ -2,10 +2,11 @@ import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Button } from "../ui/button"
-import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert } from "lucide-react"
+import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from "recharts"
 import TransactionTable from "./TransactionTable"
 import TransactionModal from "./TransactionModal"
+import QuickAddCommand from "./QuickAddCommand"
 import AnimatedCounter from "../ui/AnimatedCounter"
 import axios from "../../api/axios"
 
@@ -53,6 +54,7 @@ const DEMO_TRANSACTIONS = [
 export default function Dashboard() {
   const [expenses, setExpenses] = useState([])
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(null)
   
@@ -63,6 +65,18 @@ export default function Dashboard() {
 
   const currencySymbols = { USD: "$", INR: "₹" }
   const currSym = currencySymbols[currency]
+
+  // Global Keyboard Shortcut: Ctrl+K / Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setIsQuickAddOpen(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
     fetchExpenses()
@@ -362,6 +376,21 @@ export default function Dashboard() {
               )
             })}
           </div>
+
+          {/* Quick Add Omnibar Trigger */}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              onClick={() => setIsQuickAddOpen(true)} 
+              variant="outline" 
+              className="border-indigo-500/30 bg-slate-900/60 hover:bg-indigo-500/15 text-indigo-300 hover:text-indigo-200 hover:border-indigo-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
+            >
+              <Command className="h-4 w-4 text-indigo-400 group-hover:rotate-12 transition-transform" />
+              <span>Quick Add</span>
+              <kbd className="ml-1 px-1.5 py-0.5 rounded bg-slate-800/90 border border-slate-700/80 font-mono text-[10px] text-slate-300 shadow-sm">
+                ⌘K
+              </kbd>
+            </Button>
+          </motion.div>
 
           {/* Seed Demo Data Button */}
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -850,6 +879,13 @@ export default function Dashboard() {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTransaction}
         editingTransaction={editingTransaction}
+      />
+
+      <QuickAddCommand 
+        isOpen={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        onSave={handleSaveTransaction}
+        currencySymbol={currSym}
       />
     </motion.div>
   )
