@@ -52,7 +52,26 @@ const DEMO_TRANSACTIONS = [
 ]
 
 export default function Dashboard() {
-  const [expenses, setExpenses] = useState([])
+  const [expenses, setExpenses] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("expenses")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (e) {}
+    }
+    return DEMO_TRANSACTIONS.map((t, index) => {
+      const date = new Date()
+      date.setDate(date.getDate() - (index * 2))
+      return {
+        ...t,
+        _id: `initial-${index}`,
+        date: date.toISOString()
+      }
+    })
+  })
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
@@ -98,28 +117,43 @@ export default function Dashboard() {
   const fetchExpenses = async () => {
     try {
       const response = await axios.get("/expenses")
-      setExpenses(response.data)
-      localStorage.setItem("expenses", JSON.stringify(response.data))
+      if (Array.isArray(response.data)) {
+        setExpenses(response.data)
+        updateLocalStorage(response.data)
+        return
+      }
+      throw new Error("API response is not an array")
     } catch (error) {
-      console.error("Failed to fetch expenses, loading from localStorage:", error.message)
+      console.warn("Using offline / local expenses:", error.message)
       const localData = localStorage.getItem("expenses")
       if (localData) {
-        setExpenses(JSON.parse(localData))
+        try {
+          const parsed = JSON.parse(localData)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setExpenses(parsed)
+            return
+          }
+        } catch (e) {}
       }
+      // Auto seed demo transactions if empty
+      seedDemoData()
     }
   }
 
   const updateLocalStorage = (updatedExpenses) => {
-    localStorage.setItem("expenses", JSON.stringify(updatedExpenses))
+    if (Array.isArray(updatedExpenses)) {
+      localStorage.setItem("expenses", JSON.stringify(updatedExpenses))
+    }
   }
 
   const multiplier = currency === 'INR' ? exchangeRate : 1
 
   // Display expenses converted to active currency
   const displayExpenses = useMemo(() => {
+    if (!Array.isArray(expenses)) return []
     return expenses.map(e => ({
       ...e,
-      amount: e.amount * multiplier
+      amount: (Number(e.amount) || 0) * multiplier
     }))
   }, [expenses, multiplier])
 

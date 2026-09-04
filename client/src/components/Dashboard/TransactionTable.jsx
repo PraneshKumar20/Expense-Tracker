@@ -65,14 +65,18 @@ export default function TransactionTable({ transactions, onEdit, onDelete, curre
 
   // Extract unique categories for the filter
   const categories = useMemo(() => {
-    const cats = new Set(transactions.map(t => t.category))
+    const list = Array.isArray(transactions) ? transactions : []
+    const cats = new Set(list.map(t => t.category))
     return Array.from(cats)
   }, [transactions])
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => {
-      const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            t.category.toLowerCase().includes(searchTerm.toLowerCase())
+    const list = Array.isArray(transactions) ? transactions : []
+    return list.filter(t => {
+      const title = (t.title || "").toLowerCase()
+      const cat = (t.category || "").toLowerCase()
+      const search = searchTerm.toLowerCase()
+      const matchesSearch = title.includes(search) || cat.includes(search)
       const matchesType = filterType === "all" ? true : t.type === filterType
       const matchesCategory = filterCategory === "all" ? true : t.category === filterCategory
       return matchesSearch && matchesType && matchesCategory
