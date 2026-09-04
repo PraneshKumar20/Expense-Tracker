@@ -10,6 +10,7 @@ import QuickAddCommand from "./QuickAddCommand"
 import FinancialHealthCard from "./FinancialHealthCard"
 import CategoryEnvelopesModal from "./CategoryEnvelopesModal"
 import SubscriptionRadarModal from "./SubscriptionRadarModal"
+import SavingsGoalsModal from "./SavingsGoalsModal"
 import AnimatedCounter from "../ui/AnimatedCounter"
 import axios from "../../api/axios"
 
@@ -79,8 +80,34 @@ export default function Dashboard() {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEnvelopeModalOpen, setIsEnvelopeModalOpen] = useState(false)
   const [isSubscriptionRadarOpen, setIsSubscriptionRadarOpen] = useState(false)
+  const [isSavingsGoalsOpen, setIsSavingsGoalsOpen] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(null)
+
+  // Savings Goals & Milestones State (Persisted)
+  const [savingsGoals, setSavingsGoals] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("savings_goals")
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed
+        }
+      } catch (e) {}
+    }
+    return [
+      { id: "goal-1", title: "Emergency Reserve", targetAmount: 10000, currentAmount: 6800, emoji: "🛡️", colorIndex: 0, targetDate: "2026-12-31" },
+      { id: "goal-2", title: "Tokyo & Kyoto Vacation", targetAmount: 3500, currentAmount: 2450, emoji: "✈️", colorIndex: 1, targetDate: "2026-10-15" },
+      { id: "goal-3", title: "M4 Max MacBook Pro", targetAmount: 2200, currentAmount: 1650, emoji: "💻", colorIndex: 3, targetDate: "2026-11-20" }
+    ]
+  })
+
+  const handleUpdateSavingsGoals = (updated) => {
+    setSavingsGoals(updated)
+    try {
+      localStorage.setItem("savings_goals", JSON.stringify(updated))
+    } catch (e) {}
+  }
   
   // Category Budget Envelopes State (Persisted)
   const [categoryBudgets, setCategoryBudgets] = useState(() => {
@@ -475,6 +502,23 @@ export default function Dashboard() {
               {recurringCount > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-[10px] font-bold border border-purple-500/40">
                   {recurringCount}
+                </span>
+              )}
+            </Button>
+          </motion.div>
+
+          {/* Savings Goals Trigger */}
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              onClick={() => setIsSavingsGoalsOpen(true)} 
+              variant="outline" 
+              className="border-emerald-500/30 bg-slate-900/60 hover:bg-emerald-500/15 text-emerald-300 hover:text-emerald-200 hover:border-emerald-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
+            >
+              <Target className="h-4 w-4 text-emerald-400 group-hover:rotate-45 transition-transform" />
+              <span>Goals</span>
+              {savingsGoals.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/40">
+                  {savingsGoals.length}
                 </span>
               )}
             </Button>
@@ -965,6 +1009,15 @@ export default function Dashboard() {
         currencySymbol={currSym}
         multiplier={multiplier}
         onOpenAddModal={openAddModal}
+      />
+
+      <SavingsGoalsModal
+        isOpen={isSavingsGoalsOpen}
+        onClose={() => setIsSavingsGoalsOpen(false)}
+        savingsGoals={savingsGoals}
+        onUpdateGoals={handleUpdateSavingsGoals}
+        currencySymbol={currSym}
+        multiplier={multiplier}
       />
     </motion.div>
   )
