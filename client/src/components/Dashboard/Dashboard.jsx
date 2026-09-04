@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import TransactionTable from "./TransactionTable"
 import TransactionModal from "./TransactionModal"
 import QuickAddCommand from "./QuickAddCommand"
+import FinancialHealthCard from "./FinancialHealthCard"
 import AnimatedCounter from "../ui/AnimatedCounter"
 import axios from "../../api/axios"
 
@@ -600,57 +601,19 @@ export default function Dashboard() {
           </Card>
         </motion.div>
 
-        {/* Financial Insights Card */}
+        {/* AI Financial Health Score & Advisor Card */}
         <motion.div 
           variants={itemVariants} 
           whileHover={{ y: -4, transition: { duration: 0.2 } }} 
-          className="col-span-1 group"
+          className="col-span-1"
         >
-          <Card className="bento-card h-full flex flex-col justify-between">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                <span>Quick Insights</span>
-                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  <Zap className="h-5 w-5" />
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-white/[0.05] space-y-1">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Savings Rate</span>
-                  <span className="font-bold font-mono text-emerald-400">
-                    <AnimatedCounter value={savingsRate} decimals={1} suffix="%" />
-                  </span>
-                </div>
-                <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.max(0, Math.min(savingsRate, 100))}%` }}
-                    transition={{ duration: 1 }}
-                    className="h-full bg-emerald-400 rounded-full"
-                  />
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-white/[0.05] flex justify-between items-center text-xs">
-                <span className="text-slate-400">Avg. Expense</span>
-                <span className="font-bold font-mono text-slate-100">
-                  <AnimatedCounter value={avgTransaction} prefix={currSym} decimals={2} />
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                <p className="text-[10px] uppercase text-indigo-300 font-bold tracking-wider mb-1">Top Spend Category</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-white">{topCategory.name}</span>
-                  <span className="text-sm text-rose-400 font-bold font-mono">
-                    <AnimatedCounter value={topCategory.amount} prefix={currSym} decimals={0} />
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <FinancialHealthCard 
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            budgetLimit={budgetLimit * multiplier}
+            expenses={displayExpenses}
+            currencySymbol={currSym}
+          />
         </motion.div>
 
         {/* Activity Trend Chart */}
