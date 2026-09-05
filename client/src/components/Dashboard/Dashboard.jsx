@@ -1,45 +1,30 @@
 import { useState, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Button } from "../ui/button"
-import { PlusCircle, Wallet, TrendingUp, TrendingDown, Target, Zap, Activity, Database, Sparkles, PieChart as PieIcon, ShieldAlert, Command, Layers, Radio, User, LogOut, ChevronDown } from "lucide-react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Sector } from "recharts"
-import TransactionTable from "./TransactionTable"
+import { Sector } from "recharts"
+import axios from "../../api/axios"
+
+// Layout Components
+import Sidebar from "../Layout/Sidebar"
+import MobileNav from "../Layout/MobileNav"
+import AppHeader from "../Layout/AppHeader"
+
+// View Components
+import OverviewView from "./OverviewView"
+import TransactionsView from "./TransactionsView"
+import AnalyticsView from "./AnalyticsView"
+import BudgetsView from "./BudgetsView"
+import SubscriptionsView from "./SubscriptionsView"
+
+// Modals
 import TransactionModal from "./TransactionModal"
 import QuickAddCommand from "./QuickAddCommand"
-import FinancialHealthCard from "./FinancialHealthCard"
 import CategoryEnvelopesModal from "./CategoryEnvelopesModal"
 import SubscriptionRadarModal from "./SubscriptionRadarModal"
 import SavingsGoalsModal from "./SavingsGoalsModal"
-import AnimatedCounter from "../ui/AnimatedCounter"
-import axios from "../../api/axios"
+import { useToast } from "../ui/Toast"
 
 const COLORS = ['#6366f1', '#8b5cf6', '#10b981', '#f43f5e', '#f59e0b', '#0ea5e9', '#ec4899', '#14b8a6']
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { 
-      type: "spring", 
-      stiffness: 260, 
-      damping: 22 
-    } 
-  }
-}
 
 const DEMO_TRANSACTIONS = [
   { title: "Monthly Salary", amount: 6500, category: "Salary", type: "income", isRecurring: true },
@@ -58,6 +43,12 @@ const DEMO_TRANSACTIONS = [
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { addToast } = useToast()
+
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState("overview")
+
+  // User session state
   const [currentUser, setCurrentUser] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -65,15 +56,16 @@ export default function Dashboard() {
         if (saved) return JSON.parse(saved)
       } catch (e) {}
     }
-    return { name: "Personal Ledger", email: "guest@expenseflow.app", isGuest: true }
+    return { name: "Personal Ledger", email: "guest@ledgerflow.app", isGuest: true }
   })
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
   const handleLogout = () => {
     localStorage.removeItem("user")
+    addToast({ title: "Signed Out", message: "You have been logged out.", type: "info" })
     navigate("/login")
   }
 
+  // Transactions State (API + LocalStorage fallback)
   const [expenses, setExpenses] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -94,6 +86,8 @@ export default function Dashboard() {
       }
     })
   })
+
+  // Modal visibility states
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEnvelopeModalOpen, setIsEnvelopeModalOpen] = useState(false)
@@ -124,6 +118,7 @@ export default function Dashboard() {
     setSavingsGoals(updated)
     try {
       localStorage.setItem("savings_goals", JSON.stringify(updated))
+      addToast({ title: "Goals Updated", message: "Savings progress saved.", type: "success" })
     } catch (e) {}
   }
   
@@ -151,15 +146,16 @@ export default function Dashboard() {
       const next = { ...prev, [category]: limit }
       try {
         localStorage.setItem("category_budgets", JSON.stringify(next))
+        addToast({ title: "Budget Saved", message: `${category} limit set to ${limit}`, type: "success" })
       } catch (e) {}
       return next
     })
   }
 
-  // Advanced Features State
+  // Budget limit & Currency state
   const [budgetLimit, setBudgetLimit] = useState(3000)
   const [currency, setCurrency] = useState("USD")
-  const [exchangeRate, setExchangeRate] = useState(83.50) // Default fallback
+  const [exchangeRate, setExchangeRate] = useState(83.50)
 
   const currencySymbols = { USD: "$", INR: "₹" }
   const currSym = currencySymbols[currency]
@@ -214,7 +210,6 @@ export default function Dashboard() {
           }
         } catch (e) {}
       }
-      // Auto seed demo transactions if empty
       seedDemoData()
     }
   }
@@ -250,6 +245,7 @@ export default function Dashboard() {
           updateLocalStorage(next)
           return next
         })
+        addToast({ title: "Updated", message: `Saved changes to "${transaction.title}".`, type: "success" })
       } else {
         const response = await axios.post("/expenses", baseTransaction)
         setExpenses((prev) => {
@@ -257,6 +253,7 @@ export default function Dashboard() {
           updateLocalStorage(next)
           return next
         })
+        addToast({ title: "Created", message: `Logged "${transaction.title}" to ledger.`, type: "success" })
       }
     } catch (error) {
       console.error("Save transaction failed, falling back to local state:", error.message)
@@ -266,6 +263,7 @@ export default function Dashboard() {
           updateLocalStorage(next)
           return next
         })
+        addToast({ title: "Saved Locally", message: `Updated "${transaction.title}".`, type: "info" })
       } else {
         const fallbackId = `local-${Date.now()}`
         const fallbackTransaction = {
@@ -278,6 +276,7 @@ export default function Dashboard() {
           updateLocalStorage(next)
           return next
         })
+        addToast({ title: "Saved Locally", message: `Recorded "${transaction.title}".`, type: "info" })
       }
     }
   }
@@ -290,12 +289,14 @@ export default function Dashboard() {
         updateLocalStorage(next)
         return next
       })
+      addToast({ title: "Deleted", message: "Transaction removed from ledger.", type: "error" })
     } catch (error) {
       setExpenses((prev) => {
         const next = prev.filter((e) => e._id !== id)
         updateLocalStorage(next)
         return next
       })
+      addToast({ title: "Deleted Locally", message: "Transaction removed.", type: "error" })
     }
   }
 
@@ -311,6 +312,7 @@ export default function Dashboard() {
     })
     setExpenses(seededData)
     updateLocalStorage(seededData)
+    addToast({ title: "Demo Seeded", message: "Standard demo transactions reloaded.", type: "info" })
   }
 
   const openEditModal = (transaction) => {
@@ -323,7 +325,7 @@ export default function Dashboard() {
     setIsModalOpen(true)
   }
 
-  // --- Financial Analytics Calculations ---
+  // --- Financial Calculations ---
   const { totalIncome, totalExpense, balance, topCategory, avgTransaction, budgetPercent } = useMemo(() => {
     let inc = 0, exp = 0
     const catMap = {}
@@ -383,44 +385,26 @@ export default function Dashboard() {
 
   const renderActiveShape = (props) => {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
-
     return (
       <g className="cursor-pointer">
-        {/* Outer ambient glow halo */}
         <Sector
           cx={cx}
           cy={cy}
-          innerRadius={outerRadius + 6}
-          outerRadius={outerRadius + 14}
+          innerRadius={outerRadius + 4}
+          outerRadius={outerRadius + 10}
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
           opacity={0.3}
         />
-        {/* Outer neon accent arc */}
         <Sector
           cx={cx}
           cy={cy}
-          innerRadius={outerRadius + 2}
-          outerRadius={outerRadius + 4}
+          innerRadius={innerRadius - 2}
+          outerRadius={outerRadius + 5}
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
-          opacity={0.9}
-        />
-        {/* Popped-out main slice */}
-        <Sector
-          cx={cx}
-          cy={cy}
-          innerRadius={innerRadius - 4}
-          outerRadius={outerRadius + 8}
-          startAngle={startAngle}
-          endAngle={endAngle}
-          fill={fill}
-          style={{
-            filter: `drop-shadow(0 0 14px ${fill})`,
-            transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)"
-          }}
         />
       </g>
     )
@@ -432,622 +416,170 @@ export default function Dashboard() {
     return Array.isArray(displayExpenses) ? displayExpenses.filter(e => e.isRecurring && e.type === 'expense').length : 0
   }, [displayExpenses])
 
+  // Rough health grade estimation for sidebar badge
+  const healthGrade = useMemo(() => {
+    if (savingsRate >= 25 && budgetPercent <= 80) return "A+"
+    if (savingsRate >= 15 && budgetPercent <= 90) return "B+"
+    if (savingsRate > 0) return "C"
+    return "D"
+  }, [savingsRate, budgetPercent])
+
   return (
-    <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
-    >
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-2 border-b border-white/[0.06]">
-        <motion.div variants={itemVariants} className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-sm">
-              Financial Command Center
-            </h1>
-            <motion.div 
-              animate={{ rotate: [0, 15, -15, 0] }} 
-              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="hidden sm:inline-flex p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400"
+    <div className="flex min-h-screen bg-[#070b12] text-slate-100">
+      {/* Desktop Left Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenAddModal={openAddModal}
+        onOpenQuickAdd={() => setIsQuickAddOpen(true)}
+        onSeedDemo={seedDemoData}
+        transactionCount={displayExpenses.length}
+        recurringCount={recurringCount}
+        healthGrade={healthGrade}
+        goalsCount={savingsGoals.length}
+        currency={currency}
+        setCurrency={(c) => {
+          setCurrency(c)
+          addToast({ title: "Currency Changed", message: `Active display currency set to ${c}.`, type: "info" })
+        }}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onSaveTransaction={handleSaveTransaction}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 pb-24 lg:pb-12">
+        {/* Mobile Navigation */}
+        <MobileNav
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenAddModal={openAddModal}
+          onOpenQuickAdd={() => setIsQuickAddOpen(true)}
+          currency={currency}
+          setCurrency={(c) => {
+            setCurrency(c)
+            addToast({ title: "Currency Changed", message: `Switched to ${c}.`, type: "info" })
+          }}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+
+        <main className="flex-1 px-4 sm:px-6 lg:px-10 pt-6 lg:pt-8 max-w-7xl w-full mx-auto">
+          {/* Desktop App Header */}
+          <AppHeader
+            activeTab={activeTab}
+            onOpenAddModal={openAddModal}
+            onOpenQuickAdd={() => setIsQuickAddOpen(true)}
+            currentUser={currentUser}
+            onLogout={handleLogout}
+            currency={currency}
+            setCurrency={setCurrency}
+            recurringCount={recurringCount}
+            goalsCount={savingsGoals.length}
+          />
+
+          {/* Dynamic Active Tab View */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
             >
-              <Sparkles className="h-5 w-5" />
+              {activeTab === "overview" && (
+                <OverviewView
+                  balance={balance}
+                  totalIncome={totalIncome}
+                  totalExpense={totalExpense}
+                  currSym={currSym}
+                  multiplier={multiplier}
+                  incomeShare={incomeShare}
+                  budgetPercent={budgetPercent}
+                  budgetLimit={budgetLimit}
+                  setBudgetLimit={setBudgetLimit}
+                  trendData={trendData}
+                  categoryData={categoryData}
+                  totalCategoryExpense={totalCategoryExpense}
+                  activeCategoryIndex={activeCategoryIndex}
+                  setActiveCategoryIndex={setActiveCategoryIndex}
+                  renderActiveShape={renderActiveShape}
+                  displayExpenses={displayExpenses}
+                  openEditModal={openEditModal}
+                  handleDeleteTransaction={handleDeleteTransaction}
+                  openAddModal={openAddModal}
+                  setIsEnvelopeModalOpen={setIsEnvelopeModalOpen}
+                  setActiveTab={setActiveTab}
+                />
+              )}
+
+              {activeTab === "transactions" && (
+                <TransactionsView
+                  transactions={displayExpenses}
+                  onEdit={openEditModal}
+                  onDelete={handleDeleteTransaction}
+                  currencySymbol={currSym}
+                  onOpenAddModal={openAddModal}
+                  totalIncome={totalIncome}
+                  totalExpense={totalExpense}
+                  balance={balance}
+                />
+              )}
+
+              {activeTab === "analytics" && (
+                <AnalyticsView
+                  totalIncome={totalIncome}
+                  totalExpense={totalExpense}
+                  balance={balance}
+                  budgetLimit={budgetLimit}
+                  multiplier={multiplier}
+                  currencySymbol={currSym}
+                  displayExpenses={displayExpenses}
+                  savingsRate={savingsRate}
+                  avgTransaction={avgTransaction}
+                  topCategory={topCategory}
+                  trendData={trendData}
+                  categoryData={categoryData}
+                  totalCategoryExpense={totalCategoryExpense}
+                  activeCategoryIndex={activeCategoryIndex}
+                  setActiveCategoryIndex={setActiveCategoryIndex}
+                  renderActiveShape={renderActiveShape}
+                />
+              )}
+
+              {activeTab === "budgets" && (
+                <BudgetsView
+                  budgetLimit={budgetLimit}
+                  setBudgetLimit={setBudgetLimit}
+                  budgetPercent={budgetPercent}
+                  totalExpense={totalExpense}
+                  currSym={currSym}
+                  multiplier={multiplier}
+                  categoryBudgets={categoryBudgets}
+                  handleUpdateCategoryBudget={handleUpdateCategoryBudget}
+                  setIsEnvelopeModalOpen={setIsEnvelopeModalOpen}
+                  savingsGoals={savingsGoals}
+                  handleUpdateSavingsGoals={handleUpdateSavingsGoals}
+                  setIsSavingsGoalsOpen={setIsSavingsGoalsOpen}
+                  displayExpenses={displayExpenses}
+                />
+              )}
+
+              {activeTab === "subscriptions" && (
+                <SubscriptionsView
+                  displayExpenses={displayExpenses}
+                  currencySymbol={currSym}
+                  multiplier={multiplier}
+                  openAddModal={openAddModal}
+                  setIsSubscriptionRadarOpen={setIsSubscriptionRadarOpen}
+                />
+              )}
             </motion.div>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              REAL-TIME LEDGER
-            </div>
-            <span className="text-slate-400 text-sm font-medium">
-              Enterprise-grade financial intelligence & analytics.
-            </span>
-          </div>
-        </motion.div>
-        
-        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-          {/* Animated Currency Pill */}
-          <div className="flex bg-slate-900/80 p-1 rounded-xl border border-white/[0.08] backdrop-blur-xl shadow-lg relative">
-            {['USD', 'INR'].map(curr => {
-              const isActive = currency === curr
-              return (
-                <button 
-                  key={curr} 
-                  onClick={() => setCurrency(curr)}
-                  className={`relative px-3.5 py-1.5 text-xs font-bold rounded-lg transition-colors z-10 ${isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'}`}
-                >
-                  {isActive && (
-                    <motion.div 
-                      layoutId="currencyPill"
-                      className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg shadow-md shadow-indigo-500/30"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{curr}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Quick Add Omnibar Trigger */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              onClick={() => setIsQuickAddOpen(true)} 
-              variant="outline" 
-              className="border-indigo-500/30 bg-slate-900/60 hover:bg-indigo-500/15 text-indigo-300 hover:text-indigo-200 hover:border-indigo-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
-            >
-              <Command className="h-4 w-4 text-indigo-400 group-hover:rotate-12 transition-transform" />
-              <span>Quick Add</span>
-              <kbd className="ml-1 px-1.5 py-0.5 rounded bg-slate-800/90 border border-slate-700/80 font-mono text-[10px] text-slate-300 shadow-sm">
-                ⌘K
-              </kbd>
-            </Button>
-          </motion.div>
-
-          {/* Subscription & Bill Radar Trigger */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              onClick={() => setIsSubscriptionRadarOpen(true)} 
-              variant="outline" 
-              className="border-purple-500/30 bg-slate-900/60 hover:bg-purple-500/15 text-purple-300 hover:text-purple-200 hover:border-purple-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
-            >
-              <Radio className="h-4 w-4 text-purple-400 group-hover:animate-pulse" />
-              <span>Bill Radar</span>
-              {recurringCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono text-[10px] font-bold border border-purple-500/40">
-                  {recurringCount}
-                </span>
-              )}
-            </Button>
-          </motion.div>
-
-          {/* Savings Goals Trigger */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              onClick={() => setIsSavingsGoalsOpen(true)} 
-              variant="outline" 
-              className="border-emerald-500/30 bg-slate-900/60 hover:bg-emerald-500/15 text-emerald-300 hover:text-emerald-200 hover:border-emerald-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group flex items-center gap-1.5"
-            >
-              <Target className="h-4 w-4 text-emerald-400 group-hover:rotate-45 transition-transform" />
-              <span>Goals</span>
-              {savingsGoals.length > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/40">
-                  {savingsGoals.length}
-                </span>
-              )}
-            </Button>
-          </motion.div>
-
-          {/* Seed Demo Data Button */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              onClick={seedDemoData} 
-              variant="outline" 
-              className="border-indigo-500/30 bg-slate-900/60 hover:bg-indigo-500/15 text-indigo-300 hover:text-indigo-200 hover:border-indigo-500/50 backdrop-blur-xl shadow-lg transition-all duration-300 group"
-            >
-              <Database className="mr-2 h-4 w-4 text-indigo-400 group-hover:rotate-180 transition-transform duration-500" />
-              Seed Demo
-            </Button>
-          </motion.div>
-
-          {/* New Transaction Button with Radiant Shimmer */}
-          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-            <Button 
-              onClick={openAddModal} 
-              className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold shadow-[0_0_25px_rgba(99,102,241,0.4)] hover:shadow-[0_0_35px_rgba(99,102,241,0.6)] border border-indigo-400/30 transition-all duration-300 group"
-            >
-              {/* Shimmer sweep effect */}
-              <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
-              <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-              New Transaction
-            </Button>
-          </motion.div>
-
-          {/* User Profile & Session Pill */}
-          <div className="relative">
-            <button
-              onClick={() => setIsUserMenuOpen(prev => !prev)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800/80 border border-white/[0.08] backdrop-blur-xl shadow-lg transition-all cursor-pointer"
-            >
-              <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-[10px] font-extrabold text-white uppercase shadow-sm">
-                {currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : "PL"}
-              </div>
-              <span className="text-xs font-semibold text-slate-200 hidden sm:inline max-w-[90px] truncate">
-                {currentUser?.name || "Account"}
-              </span>
-              <ChevronDown className="h-3 w-3 text-slate-400" />
-            </button>
-
-            <AnimatePresence>
-              {isUserMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-52 rounded-2xl bg-slate-900/95 border border-white/[0.1] shadow-2xl backdrop-blur-2xl p-2 z-50 space-y-1"
-                >
-                  <div className="px-3 py-2 border-b border-white/[0.06]">
-                    <p className="text-xs font-bold text-white truncate">{currentUser?.name || "Explorer"}</p>
-                    <p className="text-[10px] text-slate-400 truncate">{currentUser?.email || "Active Session"}</p>
-                    {currentUser?.isGuest && (
-                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[9px] font-bold">
-                        Demo Mode
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="w-full px-3 py-2 rounded-xl text-left text-xs font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <User className="h-3.5 w-3.5 text-indigo-400" />
-                    <span>{currentUser?.isGuest ? "Sign In / Register" : "Switch Account"}</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-3 py-2 rounded-xl text-left text-xs font-medium text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 flex items-center gap-2 transition-colors cursor-pointer"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                    <span>Sign Out</span>
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
+          </AnimatePresence>
+        </main>
       </div>
 
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {/* Net Balance Card */}
-        <motion.div 
-          variants={itemVariants} 
-          whileHover={{ y: -4, transition: { duration: 0.2 } }} 
-          className="lg:col-span-2 group"
-        >
-          <Card className="bento-card h-full bg-gradient-to-br from-indigo-950/60 via-slate-900/80 to-slate-950/80 border-indigo-500/30 shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
-            {/* Top glowing ambient accent */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/30 transition-colors" />
-            
-            <CardHeader className="pb-2 relative z-10">
-              <CardTitle className="text-xs font-bold tracking-widest text-indigo-300 uppercase flex items-center justify-between">
-                <span>Total Net Balance</span>
-                <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-300 shadow-inner">
-                  <Wallet className="h-5 w-5" />
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 relative z-10">
-              <div>
-                <div className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight flex items-baseline gap-1">
-                  <AnimatedCounter 
-                    value={balance} 
-                    prefix={currSym} 
-                    className="drop-shadow-[0_2px_10px_rgba(255,255,255,0.15)]"
-                  />
-                </div>
-                <p className="text-xs text-slate-400 mt-1 font-medium">Updated automatically from active transactions</p>
-              </div>
-
-              {/* Income vs Expense Quick Ratio Bar */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-[11px] font-mono font-medium text-slate-400">
-                  <span className="text-emerald-400 flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    Income Ratio: {incomeShare.toFixed(0)}%
-                  </span>
-                  <span className="text-rose-400 flex items-center gap-1">
-                    Expense Ratio: {(100 - incomeShare).toFixed(0)}%
-                    <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
-                  </span>
-                </div>
-                <div className="h-2 w-full bg-slate-800/80 rounded-full overflow-hidden flex shadow-inner">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${incomeShare}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-emerald-500 h-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                  />
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${100 - incomeShare}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="bg-rose-500 h-full shadow-[0_0_10px_rgba(244,63,94,0.5)]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/[0.06]">
-                <div className="space-y-1">
-                  <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-                    <TrendingUp className="h-3.5 w-3.5 text-emerald-400" /> Monthly Income
-                  </p>
-                  <p className="text-xl sm:text-2xl font-bold text-emerald-400">
-                    <AnimatedCounter value={totalIncome} prefix={currSym} />
-                  </p>
-                </div>
-                <div className="space-y-1 pl-4 border-l border-white/[0.06]">
-                  <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-                    <TrendingDown className="h-3.5 w-3.5 text-rose-400" /> Monthly Expenses
-                  </p>
-                  <p className="text-xl sm:text-2xl font-bold text-rose-400">
-                    <AnimatedCounter value={totalExpense} prefix={currSym} />
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Budget Limit Card */}
-        <motion.div 
-          variants={itemVariants} 
-          whileHover={{ y: -4, transition: { duration: 0.2 } }} 
-          className="col-span-1 group"
-        >
-          <Card className="bento-card h-full relative overflow-hidden flex flex-col justify-between">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span>Budget Usage</span>
-                  <button
-                    onClick={() => setIsEnvelopeModalOpen(true)}
-                    className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25 transition-all flex items-center gap-1 cursor-pointer"
-                    title="Manage Category Envelopes"
-                  >
-                    <Layers className="h-3 w-3" />
-                    Envelopes
-                  </button>
-                </div>
-                <div className={`p-2 rounded-xl border ${budgetPercent > 90 ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-slate-800/60 border-slate-700/50 text-slate-300'}`}>
-                  {budgetPercent > 90 ? <ShieldAlert className="h-5 w-5 animate-pulse" /> : <Target className="h-5 w-5 opacity-70" />}
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-baseline">
-                <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                  <AnimatedCounter value={budgetPercent} decimals={0} suffix="%" />
-                </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  of {currSym}{(budgetLimit * multiplier).toLocaleString()}
-                </span>
-              </div>
-
-              {/* Progress Bar with animated stripes and glow */}
-              <div className="space-y-1.5">
-                <div className="h-3 w-full bg-slate-800/90 rounded-full overflow-hidden p-0.5 border border-white/[0.05] shadow-inner">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${budgetPercent}%` }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className={`h-full rounded-full bar-stripes-animated transition-all duration-500 shadow-lg ${
-                      budgetPercent > 90 
-                        ? 'bg-rose-500 shadow-rose-500/50' 
-                        : budgetPercent > 75 
-                          ? 'bg-amber-500 shadow-amber-500/50' 
-                          : 'bg-emerald-500 shadow-emerald-500/50'
-                    }`}
-                  />
-                </div>
-                {budgetPercent > 90 && (
-                  <p className="text-[11px] text-rose-400 font-semibold flex items-center gap-1 animate-pulse">
-                    ⚠️ Approaching budget threshold!
-                  </p>
-                )}
-              </div>
-
-              <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-medium">Monthly Limit:</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-slate-400 font-mono">{currSym}</span>
-                  <input 
-                    type="number" 
-                    value={budgetLimit} 
-                    onChange={(e) => setBudgetLimit(Number(e.target.value) || 0)}
-                    className="w-24 bg-slate-800/80 border border-slate-700/80 rounded-lg px-2 py-1 text-xs font-mono text-white text-right outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* AI Financial Health Score & Advisor Card */}
-        <motion.div 
-          variants={itemVariants} 
-          whileHover={{ y: -4, transition: { duration: 0.2 } }} 
-          className="col-span-1"
-        >
-          <FinancialHealthCard 
-            totalIncome={totalIncome}
-            totalExpense={totalExpense}
-            budgetLimit={budgetLimit * multiplier}
-            expenses={displayExpenses}
-            currencySymbol={currSym}
-          />
-        </motion.div>
-
-        {/* Activity Trend Chart */}
-        <motion.div 
-          variants={itemVariants} 
-          whileHover={{ y: -3, transition: { duration: 0.2 } }} 
-          className="col-span-1 md:col-span-2 lg:col-span-3"
-        >
-          <Card className="bento-card h-full">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                  <Activity className="h-4 w-4" />
-                </div>
-                <span>7-Day Cashflow Velocity</span>
-              </CardTitle>
-              <div className="flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                  <span className="text-slate-400 font-medium">Income</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
-                  <span className="text-slate-400 font-medium">Expense</span>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="h-[300px] pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={trendData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#059669" stopOpacity={0.5} />
-                    </linearGradient>
-                    <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#be123c" stopOpacity={0.5} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `${currSym}${value}`} />
-                  <Tooltip 
-                    cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(15, 23, 42, 0.95)', 
-                      borderColor: 'rgba(99, 102, 241, 0.3)', 
-                      borderRadius: '14px', 
-                      backdropFilter: 'blur(16px)',
-                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(99,102,241,0.2)' 
-                    }}
-                    itemStyle={{ color: '#f8fafc', fontWeight: '600', fontSize: '12px' }}
-                    formatter={(val) => [`${currSym}${Number(val).toFixed(2)}`]}
-                  />
-                  <Bar 
-                    dataKey="income" 
-                    fill="url(#incomeGrad)" 
-                    radius={[6, 6, 0, 0]} 
-                    name="Income" 
-                    maxBarSize={36} 
-                    animationDuration={1200}
-                  />
-                  <Bar 
-                    dataKey="expense" 
-                    fill="url(#expenseGrad)" 
-                    radius={[6, 6, 0, 0]} 
-                    name="Expense" 
-                    maxBarSize={36} 
-                    animationDuration={1200}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Category Doughnut Chart with Pop-up Inspection */}
-        <motion.div 
-          variants={itemVariants} 
-          whileHover={{ y: -3, transition: { duration: 0.2 } }} 
-          className="col-span-1 md:col-span-2 lg:col-span-1"
-        >
-          <Card className="bento-card h-full flex flex-col justify-between relative overflow-hidden">
-            <CardHeader className="pb-1">
-              <CardTitle className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                    <PieIcon className="h-4 w-4" />
-                  </div>
-                  <span>Expense Breakdown</span>
-                </div>
-                {activeCategoryIndex !== null && (
-                  <span className="text-[10px] text-purple-300 font-mono font-medium animate-pulse">
-                    ● INSPECTING
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-            
-            <CardContent className="flex flex-col justify-between flex-1 p-2 pt-0">
-              {categoryData.length > 0 ? (
-                <>
-                  {/* Donut Chart Container with Centered Pop-up HUD */}
-                  <div className="relative w-full h-[220px] flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={categoryData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={54}
-                          outerRadius={74}
-                          paddingAngle={6}
-                          dataKey="value"
-                          stroke="rgba(15, 23, 42, 0.9)"
-                          strokeWidth={2}
-                          activeIndex={activeCategoryIndex}
-                          activeShape={renderActiveShape}
-                          onMouseEnter={(_, index) => setActiveCategoryIndex(index)}
-                          onMouseLeave={() => setActiveCategoryIndex(null)}
-                          animationDuration={1000}
-                        >
-                          {categoryData.map((entry, index) => {
-                            const isHovered = activeCategoryIndex === index
-                            return (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={COLORS[index % COLORS.length]} 
-                                className="transition-opacity duration-300 cursor-pointer"
-                                opacity={activeCategoryIndex === null || isHovered ? 1 : 0.3}
-                              />
-                            )
-                          })}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-
-                    {/* Centered Pop-up Result HUD */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <AnimatePresence mode="wait">
-                        {activeCategoryIndex !== null && categoryData[activeCategoryIndex] ? (
-                          <motion.div
-                            key={`active-${categoryData[activeCategoryIndex].name}`}
-                            initial={{ scale: 0.7, opacity: 0, y: 6 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.7, opacity: 0, y: -6 }}
-                            transition={{ type: "spring", stiffness: 450, damping: 25 }}
-                            className="flex flex-col items-center justify-center text-center px-1 max-w-[120px]"
-                          >
-                            <span 
-                              className="text-[11px] font-bold uppercase tracking-wider mb-0.5 truncate max-w-full drop-shadow-sm"
-                              style={{ color: COLORS[activeCategoryIndex % COLORS.length] }}
-                            >
-                              {categoryData[activeCategoryIndex].name}
-                            </span>
-                            <span className="text-base sm:text-lg font-extrabold text-white font-mono leading-tight tracking-tight">
-                              {currSym}{categoryData[activeCategoryIndex].value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                            </span>
-                            <span 
-                              className="text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border backdrop-blur-md flex items-center gap-1 shadow-sm"
-                              style={{ 
-                                backgroundColor: `${COLORS[activeCategoryIndex % COLORS.length]}20`, 
-                                borderColor: `${COLORS[activeCategoryIndex % COLORS.length]}50`,
-                                color: COLORS[activeCategoryIndex % COLORS.length],
-                                boxShadow: `0 0 10px ${COLORS[activeCategoryIndex % COLORS.length]}30`
-                              }}
-                            >
-                              <span 
-                                className="h-1.5 w-1.5 rounded-full animate-ping"
-                                style={{ backgroundColor: COLORS[activeCategoryIndex % COLORS.length] }}
-                              />
-                              {totalCategoryExpense > 0 ? ((categoryData[activeCategoryIndex].value / totalCategoryExpense) * 100).toFixed(0) : 0}%
-                            </span>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="default-center"
-                            initial={{ scale: 0.85, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.85, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex flex-col items-center justify-center text-center px-2"
-                          >
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">
-                              TOTAL SPENT
-                            </span>
-                            <span className="text-base sm:text-lg font-extrabold text-white font-mono leading-tight">
-                              {currSym}{totalCategoryExpense.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                            </span>
-                            <span className="text-[10px] text-indigo-300/80 font-medium mt-1 flex items-center gap-1 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                              Hover slice
-                            </span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {/* Synchronized Category Pill Deck */}
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 pb-1 border-t border-white/[0.05]">
-                    {categoryData.map((cat, idx) => {
-                      const isSelected = activeCategoryIndex === idx
-                      const color = COLORS[idx % COLORS.length]
-                      const percent = totalCategoryExpense > 0 ? ((cat.value / totalCategoryExpense) * 100).toFixed(0) : 0
-
-                      return (
-                        <button
-                          key={cat.name}
-                          onMouseEnter={() => setActiveCategoryIndex(idx)}
-                          onMouseLeave={() => setActiveCategoryIndex(null)}
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium transition-all duration-200 border cursor-pointer ${
-                            isSelected 
-                              ? 'bg-slate-800 text-white shadow-md scale-105 backdrop-blur-md' 
-                              : 'bg-slate-900/50 text-slate-400 border-white/[0.05] hover:text-slate-200 hover:bg-slate-800/40'
-                          }`}
-                          style={{
-                            borderColor: isSelected ? color : undefined,
-                            boxShadow: isSelected ? `0 0 12px ${color}35` : undefined
-                          }}
-                        >
-                          <span 
-                            className="h-1.5 w-1.5 rounded-full transition-transform" 
-                            style={{ 
-                              backgroundColor: color,
-                              boxShadow: isSelected ? `0 0 6px ${color}` : undefined,
-                              transform: isSelected ? 'scale(1.25)' : 'scale(1)'
-                            }} 
-                          />
-                          <span className="font-semibold">{cat.name}</span>
-                          <span className="font-mono text-slate-400 opacity-75">{percent}%</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center text-slate-500 font-medium py-12">
-                  No expense records yet.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Full width Transaction Table */}
-        <motion.div variants={itemVariants} className="col-span-1 md:col-span-2 lg:col-span-4">
-          <TransactionTable 
-            transactions={displayExpenses} 
-            onEdit={openEditModal} 
-            onDelete={handleDeleteTransaction}
-            currencySymbol={currSym}
-          />
-        </motion.div>
-      </div>
-
+      {/* Global Modals - Connected to the exact same master handlers */}
       <TransactionModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -1089,6 +621,6 @@ export default function Dashboard() {
         currencySymbol={currSym}
         multiplier={multiplier}
       />
-    </motion.div>
+    </div>
   )
 }

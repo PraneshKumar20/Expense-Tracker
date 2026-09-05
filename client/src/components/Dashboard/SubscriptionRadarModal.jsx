@@ -76,70 +76,67 @@ export default function SubscriptionRadarModal({
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            className="relative w-full max-w-2xl bg-slate-950/95 border border-white/[0.12] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl overflow-hidden z-10 p-6 space-y-6"
+            exit={{ opacity: 0, scale: 0.98, y: 10 }}
+            transition={{ duration: 0.15 }}
+            className="relative w-full max-w-2xl bg-[#0f1523] border border-slate-800 rounded-lg shadow-2xl overflow-hidden z-10 p-5 space-y-4"
           >
-            {/* Top ambient highlight line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500" />
-
             {/* Header */}
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
+            <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+              <div>
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/30 shadow-inner">
-                    <Radio className="h-5 w-5 animate-pulse" />
+                  <div className="p-1.5 rounded bg-slate-800 text-slate-300">
+                    <Radio className="h-4 w-4" />
                   </div>
-                  <h2 className="text-xl font-extrabold text-white tracking-tight">
+                  <h2 className="text-lg font-bold text-white tracking-tight">
                     Subscription & Bill Radar
                   </h2>
                 </div>
-                <p className="text-xs text-slate-400 font-medium pl-9">
-                  Automated tracking of recurring subscriptions, annual burn rate, and renewal countdowns.
+                <p className="text-xs text-slate-400 font-normal mt-0.5">
+                  Tracking of recurring commitments, annual burn, and renewal cycles.
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors cursor-pointer"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Key Burn Rate Metrics Banner */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-900/60 border border-white/[0.08]">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800">
               <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                <div className="flex items-center gap-1.5 text-[11px] uppercase font-semibold tracking-[0.06em] text-slate-500">
                   <Flame className="h-3.5 w-3.5 text-rose-400" />
                   <span>Monthly Burn</span>
                 </div>
-                <p className="text-xl font-extrabold text-white font-mono">
+                <p className="text-xl font-semibold text-white font-mono-nums">
                   {currencySymbol}<AnimatedCounter value={monthlyBurn} decimals={2} />
                   <span className="text-xs font-normal text-slate-400">/mo</span>
                 </p>
               </div>
 
-              <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-white/[0.06] pt-2 sm:pt-0 sm:pl-3">
-                <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-slate-800 pt-2 sm:pt-0 sm:pl-3">
+                <div className="flex items-center gap-1.5 text-[11px] uppercase font-semibold tracking-[0.06em] text-slate-500">
                   <Clock className="h-3.5 w-3.5 text-indigo-400" />
                   <span>Annualized Cost</span>
                 </div>
-                <p className="text-xl font-extrabold text-white font-mono">
+                <p className="text-xl font-semibold text-white font-mono-nums">
                   {currencySymbol}<AnimatedCounter value={annualBurn} decimals={0} />
                   <span className="text-xs font-normal text-slate-400">/yr</span>
                 </p>
               </div>
 
-              <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-white/[0.06] pt-2 sm:pt-0 sm:pl-3">
-                <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              <div className="space-y-1 border-t sm:border-t-0 sm:border-l border-slate-800 pt-2 sm:pt-0 sm:pl-3">
+                <div className="flex items-center gap-1.5 text-[11px] uppercase font-semibold tracking-[0.06em] text-slate-500">
                   <Bell className="h-3.5 w-3.5 text-amber-400" />
                   <span>Due Soon</span>
                 </div>
-                <p className="text-xl font-extrabold text-white font-mono flex items-center gap-1.5">
+                <p className="text-xl font-semibold text-white font-mono-nums flex items-center gap-1.5">
                   <span>{upcomingCount}</span>
-                  <span className="text-xs font-medium text-slate-400 font-sans">
+                  <span className="text-xs font-normal text-slate-400 font-sans">
                     {upcomingCount === 1 ? "renews this week" : "renewing soon"}
                   </span>
                 </p>
@@ -167,8 +164,8 @@ export default function SubscriptionRadarModal({
 
               <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
                 {recurringSubscriptions.length === 0 ? (
-                  <div className="text-center py-10 rounded-2xl bg-slate-900/40 border border-white/[0.06] text-slate-400 text-xs space-y-2">
-                    <Radio className="h-8 w-8 text-slate-600 mx-auto" />
+                  <div className="text-center py-10 rounded-lg bg-[#0b101b] border border-slate-800 text-slate-400 text-xs space-y-2">
+                    <Radio className="h-6 w-6 text-slate-600 mx-auto" />
                     <p className="font-semibold text-slate-300">No active recurring commitments detected</p>
                     <p className="text-slate-500 text-[11px]">Mark any transaction as "Recurring" or add a subscription to track renewals here.</p>
                   </div>
@@ -176,18 +173,18 @@ export default function SubscriptionRadarModal({
                   recurringSubscriptions.map((sub) => (
                     <div
                       key={sub._id}
-                      className="p-3.5 rounded-2xl bg-slate-900/50 border border-white/[0.06] hover:border-indigo-500/30 transition-all flex items-center justify-between group"
+                      className="p-3 rounded-lg bg-[#0b101b] border border-slate-800 hover:border-slate-700 transition-colors flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-slate-800/80 border border-white/[0.06] text-slate-300 group-hover:text-white group-hover:border-indigo-500/30 transition-colors">
+                        <div className="p-2 rounded-md bg-slate-900 border border-slate-800 text-slate-300 group-hover:text-white transition-colors">
                           <CreditCard className="h-4 w-4" />
                         </div>
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                            <span className="text-sm font-semibold text-white">
                               {sub.title}
                             </span>
-                            <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 border border-white/[0.05]">
+                            <span className="text-[10px] uppercase font-medium px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                               {sub.category}
                             </span>
                           </div>
@@ -200,14 +197,14 @@ export default function SubscriptionRadarModal({
 
                       {/* Renewal Countdown Badge & Cost */}
                       <div className="text-right space-y-1">
-                        <p className="font-mono font-bold text-sm text-white">
+                        <p className="font-mono-nums font-semibold text-sm text-white">
                           {currencySymbol}{sub.amount.toFixed(2)}
                           <span className="text-xs text-slate-400 font-normal">/mo</span>
                         </p>
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-sm ${
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded border ${
                           sub.isImminent 
-                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
-                            : 'bg-slate-800 border-white/[0.05] text-slate-400'
+                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' 
+                            : 'bg-slate-800 border-slate-700 text-slate-400'
                         }`}>
                           <Clock className="h-2.5 w-2.5" />
                           {sub.daysUntilRenewal === 0 ? "Renews Today" : sub.daysUntilRenewal === 1 ? "Renews Tomorrow" : `In ${sub.daysUntilRenewal} days`}
@@ -220,13 +217,13 @@ export default function SubscriptionRadarModal({
             </div>
 
             {/* Modal Footer */}
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
               <p className="text-[11px] text-slate-400">
-                💡 Tip: Canceling just one $15/mo subscription frees up {currencySymbol}{(15 * multiplier * 12).toFixed(0)} every year.
+                Canceling just one $15/mo subscription frees up {currencySymbol}{(15 * multiplier * 12).toFixed(0)} every year.
               </p>
               <button
                 onClick={onClose}
-                className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/25 transition-all cursor-pointer"
+                className="px-4 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-colors cursor-pointer"
               >
                 Done
               </button>

@@ -40,13 +40,11 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
-        },
-        neon: {
-          blue: "hsl(var(--neon-blue))",
-          purple: "hsl(var(--neon-purple))",
-          green: "hsl(var(--neon-green))",
-          red: "hsl(var(--neon-red))",
         }
+      },
+      fontFamily: {
+        sans: ['Manrope', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        mono: ['"Geist Mono"', 'monospace'],
       },
       borderRadius: {
         lg: "var(--radius)",

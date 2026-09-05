@@ -40,29 +40,26 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#030712] p-4 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#030712] to-[#030712]" />
-            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            
-            <Card className="w-full max-w-md relative z-10 bg-slate-900/80 border-slate-800 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+        <div className="min-h-screen flex items-center justify-center bg-[#090d16] p-4">
+            <Card className="w-full max-w-md bg-[#0f1523] border border-slate-800 rounded-lg shadow-2xl">
                 <CardHeader className="space-y-2 text-center pb-4">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mx-auto mb-1">
-                        <span className="text-2xl font-black tracking-wider">⚡</span>
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-indigo-600 text-white mx-auto mb-1">
+                        <span className="text-lg font-bold tracking-wider">LF</span>
                     </div>
-                    <CardTitle className="text-3xl font-extrabold tracking-tight text-white">Welcome Back</CardTitle>
+                    <CardTitle className="text-xl font-bold tracking-tight text-white">Sign in to LedgerFlow</CardTitle>
                     <CardDescription className="text-slate-400 text-xs">
-                        Sign in to sync transactions and manage your financial radar
+                        Access your wealth analytics, category envelopes, and financial command
                     </CardDescription>
                 </CardHeader>
                 <form onSubmit={submitHandler}>
                     <CardContent className="space-y-4">
                         {error && (
-                            <div className="p-3 text-xs font-medium text-rose-300 bg-rose-500/10 rounded-xl border border-rose-500/30">
+                            <div className="p-3 text-xs font-medium text-rose-400 bg-rose-500/10 rounded-md border border-rose-500/20">
                                 {error}
                             </div>
                         )}
                         <div className="space-y-1.5">
-                            <Label htmlFor="email" className="text-xs text-slate-300">Email Address</Label>
+                            <Label htmlFor="email" className="text-xs text-slate-300 font-medium">Email Address</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -70,11 +67,11 @@ const Login = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="bg-slate-800/80 border-slate-700/80 text-white text-xs placeholder:text-slate-500"
+                                className="bg-slate-900 border-slate-700 text-white text-xs placeholder:text-slate-500 rounded-md focus:border-indigo-500"
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <Label htmlFor="password" className="text-xs text-slate-300">Password</Label>
+                            <Label htmlFor="password" className="text-xs text-slate-300 font-medium">Password</Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -82,12 +79,12 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="bg-slate-800/80 border-slate-700/80 text-white text-xs placeholder:text-slate-500"
+                                className="bg-slate-900 border-slate-700 text-white text-xs placeholder:text-slate-500 rounded-md focus:border-indigo-500"
                             />
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-3 pt-2">
-                        <Button type="submit" className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-indigo-500/25">
+                        <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-md transition-colors">
                             Sign In
                         </Button>
 
@@ -96,7 +93,7 @@ const Login = () => {
                                 <div className="w-full border-t border-slate-800"></div>
                             </div>
                             <div className="relative flex justify-center text-[10px] uppercase">
-                                <span className="bg-slate-900/80 px-2 text-slate-500 font-mono">Or explore instantly</span>
+                                <span className="bg-[#0f1523] px-2 text-slate-500 font-mono-nums">Or explore instantly</span>
                             </div>
                         </div>
 
@@ -104,9 +101,9 @@ const Login = () => {
                             type="button" 
                             onClick={handleGuestLogin}
                             variant="outline" 
-                            className="w-full border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold"
+                            className="w-full border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-medium rounded-md transition-colors"
                         >
-                            🚀 Continue as Demo Guest
+                            Continue as Demo Guest
                         </Button>
 
                         <div className="text-center text-xs text-slate-400 pt-2">
@@ -114,7 +111,7 @@ const Login = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate("/signup")}
-                                className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4 transition-colors"
+                                className="text-indigo-400 hover:text-indigo-300 font-medium underline underline-offset-4 transition-colors"
                             >
                                 Sign up
                             </button>

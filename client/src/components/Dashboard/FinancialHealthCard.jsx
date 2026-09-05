@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { Sparkles, ShieldCheck, TrendingUp, AlertTriangle, CheckCircle2, ChevronRight, X, Award, Zap, ArrowUpRight, DollarSign } from "lucide-react"
+import { ShieldCheck, ChevronRight, X, CheckCircle2, Award } from "lucide-react"
 import AnimatedCounter from "../ui/AnimatedCounter"
 
 export default function FinancialHealthCard({ 
@@ -65,9 +65,9 @@ export default function FinancialHealthCard({
 
     // Grade & Tiering
     let gradeLabel = "A+"
-    let color = "#10b981" // emerald
+    let color = "#10b981"
     let bg = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-    let text = "Elite Financial Health"
+    let text = "Elite Cashflow"
 
     if (finalScore >= 85) {
       gradeLabel = "A+"
@@ -119,36 +119,36 @@ export default function FinancialHealthCard({
         score: recurringScore,
         max: 15,
         percent: Math.round((recurringScore / 15) * 100),
-        detail: `${recurringRatio.toFixed(0)}% in subscriptions/bills`
+        detail: `${recurringRatio.toFixed(0)}% recurring`
       }
     ]
 
-    // AI Actionable Recommendations
+    // Actionable Recommendations
     const recs = []
-    if (budgetUsage > 80) {
+    if (recurringRatio > 35) {
       recs.push({
-        title: "Pace Discretionary Spending",
-        desc: `You have consumed ${budgetUsage.toFixed(0)}% of your monthly budget. Slowing non-essential shopping preserves your safety margin.`,
-        potentialSaving: `${currencySymbol}${(budgetLimit * 0.15).toFixed(0)}/mo`
+        title: "Audit Subscriptions",
+        desc: "Fixed recurring charges take up more than 35% of outflows. Audit unused subscriptions in Bill Radar.",
+        potentialSaving: `${currencySymbol}30-80/mo`
       })
     }
-    if (recurringRatio > 30) {
+    if (budgetUsage > 85) {
       recs.push({
-        title: "Audit Active Subscriptions",
-        desc: "Fixed recurring charges account for over 30% of total spend. Consolidating overlapping digital services immediately frees up cashflow.",
-        potentialSaving: `${currencySymbol}35 - ${currencySymbol}80/mo`
+        title: "Pace Discretionary Spending",
+        desc: "You have utilized over 85% of your planned monthly budget limit. Consider limiting dining & entertainment.",
+        potentialSaving: `${currencySymbol}100-200`
       })
     }
     if (savingsRate >= 25) {
       recs.push({
         title: "High Savings Optimization",
-        desc: "Your savings rate exceeds the benchmark 20%. Allocate this recurring surplus into dedicated savings targets or index funds.",
+        desc: "Your savings rate exceeds the benchmark 20%. Allocate recurring surplus into dedicated goals or reserves.",
         potentialSaving: "Wealth Compounder"
       })
     } else {
       recs.push({
         title: "Boost Emergency Runway",
-        desc: "Aiming for a 20% savings target creates a comfortable 3-month living expense buffer against unexpected volatility.",
+        desc: "Aiming for a 20% savings target creates a comfortable living expense buffer against unexpected outlays.",
         potentialSaving: `${currencySymbol}150+/mo`
       })
     }
@@ -165,107 +165,91 @@ export default function FinancialHealthCard({
   }, [totalIncome, totalExpense, budgetLimit, expenses, currencySymbol])
 
   // Radial Gauge Math
-  const radius = 34
+  const radius = 32
   const circumference = 2 * Math.PI * radius
   const strokeOffset = circumference - (totalScore / 100) * circumference
 
   return (
     <>
-      <Card className="bento-card h-full flex flex-col justify-between relative overflow-hidden group cursor-pointer" onClick={() => setIsReportOpen(true)}>
-        {/* Subtle Ambient Glow */}
-        <div 
-          className="absolute -top-16 -right-16 w-36 h-36 rounded-full blur-3xl opacity-20 pointer-events-none transition-opacity group-hover:opacity-40"
-          style={{ backgroundColor: statusColor }}
-        />
-
+      <Card 
+        className="finance-card h-full flex flex-col justify-between cursor-pointer" 
+        onClick={() => setIsReportOpen(true)}
+      >
         <CardHeader className="pb-2">
-          <CardTitle className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold text-slate-200 tracking-tight flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <span>AI Health Score</span>
+              <Award className="h-4 w-4 text-indigo-400" />
+              <span>Financial Health Score</span>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border shadow-sm ${statusBg}`}>
+            <span className={`text-[10px] font-mono-nums font-semibold px-2 py-0.5 rounded border ${statusBg}`}>
               {statusText}
             </span>
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-1">
+        <CardContent className="space-y-3 pt-1">
           {/* Gauge & Score Area */}
           <div className="flex items-center justify-between gap-3">
             <div className="relative flex items-center justify-center">
-              <svg className="w-20 h-20 transform -rotate-90">
-                {/* Background Ring */}
+              <svg className="w-18 h-18 transform -rotate-90">
                 <circle
-                  cx="40"
-                  cy="40"
+                  cx="36"
+                  cy="36"
                   r={radius}
-                  stroke="rgba(255,255,255,0.06)"
-                  strokeWidth="7"
+                  stroke="#1e293b"
+                  strokeWidth="6"
                   fill="transparent"
                 />
-                {/* Animated Score Progress Arc */}
-                <motion.circle
-                  cx="40"
-                  cy="40"
+                <circle
+                  cx="36"
+                  cy="36"
                   r={radius}
                   stroke={statusColor}
-                  strokeWidth="7"
+                  strokeWidth="6"
                   strokeDasharray={circumference}
-                  initial={{ strokeDashoffset: circumference }}
-                  animate={{ strokeDashoffset: strokeOffset }}
-                  transition={{ duration: 1.4, ease: "easeOut" }}
+                  strokeDashoffset={strokeOffset}
                   strokeLinecap="round"
                   fill="transparent"
-                  style={{
-                    filter: `drop-shadow(0 0 6px ${statusColor})`
-                  }}
                 />
               </svg>
-              {/* Score Value in Center */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-extrabold text-white font-mono leading-none tracking-tight">
+                <span className="text-xl font-bold text-white font-mono-nums leading-none">
                   <AnimatedCounter value={totalScore} decimals={0} />
                 </span>
-                <span className="text-[9px] font-bold text-slate-400 font-mono mt-0.5">/ 100</span>
+                <span className="text-[10px] text-slate-400 font-mono-nums mt-0.5">/ 100</span>
               </div>
             </div>
 
             {/* Quick Metrics Column */}
-            <div className="flex-1 space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-medium">Financial Grade</span>
-                <span className="font-extrabold font-mono text-sm" style={{ color: statusColor }}>
-                  {grade}
+            <div className="flex-1 space-y-1 text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400 font-normal">Rating</span>
+                <span className="font-bold font-mono-nums text-xs" style={{ color: statusColor }}>
+                  Grade {grade}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-medium">Top Advantage</span>
-                <span className="text-slate-200 font-semibold text-[11px] truncate max-w-[90px]">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Strongest Area</span>
+                <span className="text-slate-200 font-medium text-[11px] truncate max-w-[90px]">
                   {pillars[0].detail}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-medium">Runway</span>
-                <span className="text-emerald-400 font-semibold text-[11px]">
-                  {totalIncome > totalExpense ? "Positive Cashflow" : "Tight Buffer"}
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">Position</span>
+                <span className="text-emerald-400 font-medium text-[11px]">
+                  {totalIncome > totalExpense ? "Cashflow Positive" : "Deficit Warning"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* AI Diagnosis Pill Banner */}
-          <div className="p-2.5 rounded-xl bg-slate-900/60 border border-white/[0.06] hover:border-indigo-500/30 transition-all flex items-center justify-between group-hover:bg-slate-800/60">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <Zap className="h-3.5 w-3.5 text-indigo-400 shrink-0 animate-pulse" />
-              <p className="text-[11px] text-slate-300 font-medium truncate">
-                {recommendations[0]?.title || "Balanced Spending Cadence"}
-              </p>
-            </div>
-            <span className="text-[10px] font-bold text-indigo-400 flex items-center shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform">
-              Inspect <ChevronRight className="h-3 w-3 ml-0.5" />
+          {/* Diagnostic Link */}
+          <div className="p-2 rounded bg-slate-900 border border-slate-800 flex items-center justify-between">
+            <p className="text-[11px] text-slate-300 font-medium truncate">
+              {recommendations[0]?.title || "Balanced spending pace"}
+            </p>
+            <span className="text-[10px] font-semibold text-indigo-400 flex items-center shrink-0 ml-2">
+              Report <ChevronRight className="h-3 w-3 ml-0.5" />
             </span>
           </div>
         </CardContent>
@@ -274,113 +258,101 @@ export default function FinancialHealthCard({
       {/* Full AI Diagnostic Report Modal */}
       <AnimatePresence>
         {isReportOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-            {/* Backdrop */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsReportOpen(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
             />
 
-            {/* Modal Dialog Card */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              initial={{ opacity: 0, scale: 0.98, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className="relative w-full max-w-lg bg-slate-950/95 border border-white/[0.12] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] backdrop-blur-2xl overflow-hidden z-10 p-6 space-y-6"
+              exit={{ opacity: 0, scale: 0.98, y: 8 }}
+              transition={{ duration: 0.15 }}
+              className="relative w-full max-w-lg bg-[#0f1523] border border-slate-800 rounded-lg shadow-2xl overflow-hidden z-10 p-5 space-y-5"
             >
-              {/* Top ambient highlight */}
-              <div 
-                className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" 
-              />
-
               {/* Modal Header */}
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
+              <div className="flex items-start justify-between border-b border-slate-800 pb-3">
+                <div>
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-inner">
-                      <ShieldCheck className="h-5 w-5" />
-                    </div>
-                    <h2 className="text-xl font-extrabold text-white tracking-tight">
+                    <ShieldCheck className="h-4 w-4 text-indigo-400" />
+                    <h2 className="text-base font-bold text-white tracking-tight">
                       Financial Health Diagnostic
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-400 font-medium pl-9">
-                    AI analysis synthesized from your cashflow, budgets, and recurring liabilities.
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Synthesized from your cashflow, budgets, and recurring liabilities.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsReportOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+                  className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-850 transition-colors"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Overall Score Badge Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-slate-900/80 border border-white/[0.08] flex items-center justify-between">
+              <div className="p-3.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Composite Score</span>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400">Composite Health Score</span>
                   <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-3xl font-extrabold text-white font-mono">
+                    <span className="text-2xl font-bold text-white font-mono">
                       {totalScore}
                     </span>
-                    <span className="text-sm font-bold text-slate-400">/ 100</span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusBg}`}>
+                    <span className="text-xs text-slate-400">/ 100</span>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${statusBg}`}>
                       Grade {grade}
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Status</span>
-                  <p className="text-sm font-bold text-white mt-0.5">{statusText}</p>
+                  <span className="text-[10px] uppercase font-semibold text-slate-400">Status</span>
+                  <p className="text-xs font-semibold text-white mt-0.5">{statusText}</p>
                 </div>
               </div>
 
               {/* 4 Health Pillars Grid */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
                   Four Health Pillars
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   {pillars.map((pillar) => (
-                    <div key={pillar.name} className="p-3 rounded-xl bg-slate-900/60 border border-white/[0.06] space-y-2">
+                    <div key={pillar.name} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-300 font-semibold">{pillar.name}</span>
-                        <span className="font-mono font-bold text-white">{pillar.score}/{pillar.max}</span>
+                        <span className="text-slate-300 font-medium">{pillar.name}</span>
+                        <span className="font-mono font-semibold text-white">{pillar.score}/{pillar.max}</span>
                       </div>
                       <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pillar.percent}%` }}
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-400"
+                        <div
+                          style={{ width: `${pillar.percent}%` }}
+                          className="h-full rounded-full bg-indigo-500"
                         />
                       </div>
-                      <p className="text-[10px] text-slate-400 font-medium">{pillar.detail}</p>
+                      <p className="text-[10px] text-slate-400">{pillar.detail}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* AI Actionable Recommendations */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                  Actionable AI Insights
+              {/* Actionable Recommendations */}
+              <div className="space-y-2.5">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                  Targeted Recommendations
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {recommendations.map((rec, index) => (
-                    <div key={index} className="p-3 rounded-xl bg-slate-900/40 border border-white/[0.05] hover:border-indigo-500/25 transition-colors space-y-1">
+                    <div key={index} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
                       <div className="flex justify-between items-start">
-                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-white flex items-center gap-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                           {rec.title}
                         </span>
-                        <span className="text-[10px] font-mono font-bold text-indigo-300 px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                        <span className="text-[10px] font-mono text-slate-300 px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700">
                           {rec.potentialSaving}
                         </span>
                       </div>
@@ -393,15 +365,12 @@ export default function FinancialHealthCard({
               </div>
 
               {/* Modal Footer */}
-              <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-[10px] text-slate-500 font-mono">
-                  Engine: Aetheria Adaptive Analytics v2
-                </span>
+              <div className="pt-2 border-t border-slate-800 flex justify-end">
                 <button
                   onClick={() => setIsReportOpen(false)}
-                  className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg shadow-indigo-600/25 transition-all"
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
                 >
-                  Done
+                  Close Diagnostic
                 </button>
               </div>
             </motion.div>

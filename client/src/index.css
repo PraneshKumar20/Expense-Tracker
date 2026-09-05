@@ -4,41 +4,35 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 226 70% 55.5%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 33% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 33% 14%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 347 77% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 217 33% 14%;
+    --input: 217 33% 14%;
+    --ring: 226 70% 55.5%;
 
-    --radius: 0.75rem;
-    
-    /* Custom Neon Colors */
-    --neon-blue: 217.2 91.2% 59.8%;
-    --neon-purple: 270 100% 60%;
-    --neon-green: 142 71% 45%;
-    --neon-red: 0 84% 60%;
+    --radius: 0.625rem;
   }
 }
 
@@ -47,156 +41,95 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground overflow-x-hidden;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    background-color: #030712;
+    @apply bg-[#090d16] text-slate-100 antialiased overflow-x-hidden;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  code, kbd, samp, pre {
+    font-family: 'Geist Mono', monospace;
   }
 }
 
-/* Keyframe Animations */
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -40px) scale(1.08);
-  }
-  66% {
-    transform: translate(-25px, 20px) scale(0.95);
-  }
-}
-
-@keyframes floatReverse {
-  0%, 100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(-35px, 35px) scale(1.05);
-  }
-  66% {
-    transform: translate(25px, -30px) scale(0.92);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.4;
-    filter: blur(80px);
-  }
-  50% {
-    opacity: 0.75;
-    filter: blur(100px);
-  }
-}
-
-@keyframes shimmerSweep {
-  0% {
-    transform: translateX(-150%) skewX(-20deg);
-  }
-  100% {
-    transform: translateX(250%) skewX(-20deg);
-  }
-}
-
-@keyframes stripesMove {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 40px 0;
-  }
-}
-
-@keyframes borderGlowLoop {
-  0%, 100% {
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.15);
-  }
-  50% {
-    border-color: rgba(168, 85, 247, 0.45);
-    box-shadow: 0 0 30px -3px rgba(168, 85, 247, 0.25);
-  }
-}
-
-/* Glassmorphism & Premium utilities */
+/* Purpose-driven Financial Data & Typography Utilities */
 @layer utilities {
-  .glass {
-    @apply bg-slate-900/40 backdrop-blur-md border border-slate-800/50 shadow-xl;
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
-  
-  .glass-card {
-    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-700/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)];
+
+  .font-mono-nums {
+    font-family: 'Geist Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.015em;
   }
-  
+
+  /* Typography Hierarchy Standards */
+  .page-title {
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+  }
+
+  .section-title {
+    font-size: 1.1875rem; /* 19px */
+    line-height: 1.625rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .card-title-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .meta-label {
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Structured, calm financial cards - no glowing shadows, no neon gradients */
+  .finance-card {
+    background-color: #0f1523;
+    border: 1px solid #1e293b;
+    border-radius: 0.625rem;
+    transition: border-color 0.15s ease;
+  }
+
+  .finance-card:hover {
+    border-color: #334155;
+  }
+
+  /* Backwards compatibility for bento-card references */
   .bento-card {
-    @apply bg-slate-900/50 backdrop-blur-2xl border border-white/[0.07] shadow-xl rounded-2xl transition-all duration-300 overflow-hidden relative;
+    background-color: #0f1523;
+    border: 1px solid #1e293b;
+    border-radius: 0.625rem;
+    transition: border-color 0.15s ease;
   }
 
   .bento-card:hover {
-    @apply border-indigo-500/40 shadow-2xl shadow-indigo-500/10;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400;
-  }
-
-  .text-gradient-emerald {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-teal-400;
-  }
-
-  .text-gradient-rose {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-pink-400;
-  }
-
-  .animate-float-slow {
-    animation: floatSlow 18s ease-in-out infinite;
-  }
-
-  .animate-float-reverse {
-    animation: floatReverse 22s ease-in-out infinite;
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 6s ease-in-out infinite;
-  }
-
-  .animate-shimmer {
-    animation: shimmerSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-
-  .cyber-grid {
-    background-size: 40px 40px;
-    background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 80%);
-  }
-
-  .bar-stripes-animated {
-    background-image: linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.15) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.15) 50%,
-      rgba(255, 255, 255, 0.15) 75%,
-      transparent 75%,
-      transparent
-    );
-    background-size: 20px 20px;
-    animation: stripesMove 1.5s linear infinite;
+    border-color: #334155;
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-800 rounded-full hover:bg-slate-700;
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
   }
 }

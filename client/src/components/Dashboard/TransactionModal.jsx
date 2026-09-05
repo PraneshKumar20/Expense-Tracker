@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "../ui/dialog"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Repeat, Sparkles } from "lucide-react"
+import { Repeat } from "lucide-react"
 
 const CATEGORIES = ["Food", "Travel", "Bills", "Entertainment", "Shopping", "Salary", "Subscriptions", "Other"]
 
@@ -53,38 +52,34 @@ export default function TransactionModal({ isOpen, onClose, onSave, editingTrans
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[460px] bg-slate-950/95 border border-white/[0.1] backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-slate-100 rounded-2xl overflow-hidden">
-        {/* Top ambient highlight */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-        
-        <DialogHeader className="pt-2">
-          <DialogTitle className="text-2xl font-extrabold text-white flex items-center gap-2">
-            <span>{editingTransaction ? "Edit Record" : "New Transaction"}</span>
-            <Sparkles className="h-4 w-4 text-indigo-400" />
+      <DialogContent className="sm:max-w-[440px] bg-[#0f1523] border border-slate-800 text-slate-100 rounded-lg shadow-2xl">
+        <DialogHeader className="pt-1">
+          <DialogTitle className="text-lg font-bold text-white tracking-tight">
+            {editingTransaction ? "Edit Transaction" : "New Transaction"}
           </DialogTitle>
-          <DialogDescription className="text-slate-400 text-xs">
-            Log financial flows directly to your real-time analytics ledger.
+          <DialogDescription className="text-slate-400 text-xs font-normal leading-relaxed">
+            Log financial flows directly to your ledger.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-              Description
+        <form onSubmit={handleSubmit} className="space-y-3.5 py-1">
+          <div className="space-y-1">
+            <Label htmlFor="title" className="text-xs font-medium text-slate-300">
+              Description / Payee
             </Label>
             <Input 
               id="title" 
-              placeholder="e.g. Cloud Hosting or Salary" 
+              placeholder="e.g. AWS Cloud or Freelance" 
               value={formData.title} 
               onChange={(e) => setFormData({...formData, title: e.target.value})} 
               required 
-              className="bg-slate-900/70 border-white/[0.08] focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500/20 text-slate-100" 
+              className="bg-slate-900 border-slate-800 focus-visible:border-indigo-500 text-slate-100 text-xs rounded" 
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="amount" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <Label htmlFor="amount" className="text-xs font-medium text-slate-300">
                 Amount
               </Label>
               <Input 
@@ -95,36 +90,36 @@ export default function TransactionModal({ isOpen, onClose, onSave, editingTrans
                 value={formData.amount} 
                 onChange={(e) => setFormData({...formData, amount: e.target.value})} 
                 required 
-                className="bg-slate-900/70 border-white/[0.08] focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500/20 font-mono text-base font-bold text-slate-100" 
+                className="bg-slate-900 border-slate-800 focus-visible:border-indigo-500 font-mono-nums text-sm font-semibold text-slate-100 rounded" 
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-slate-300">
                 Type
               </Label>
               <Select value={formData.type} onValueChange={(val) => setFormData({...formData, type: val})}>
-                <SelectTrigger className="bg-slate-900/70 border-white/[0.08] focus:ring-2 focus:ring-indigo-500/20 text-slate-100 font-semibold text-xs">
+                <SelectTrigger className="bg-slate-900 border-slate-800 focus:ring-0 text-slate-100 font-medium text-xs rounded">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700 text-slate-100">
-                  <SelectItem value="expense" className="text-rose-400 font-semibold">Expense</SelectItem>
-                  <SelectItem value="income" className="text-emerald-400 font-semibold">Income</SelectItem>
+                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 text-xs">
+                  <SelectItem value="expense" className="text-rose-400 font-medium">Expense (-)</SelectItem>
+                  <SelectItem value="income" className="text-emerald-400 font-medium">Income (+)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="grid grid-cols-2 gap-2.5">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium text-slate-300">
                 Category
               </Label>
               <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})} required>
-                <SelectTrigger className="bg-slate-900/70 border-white/[0.08] focus:ring-2 focus:ring-indigo-500/20 text-slate-100 font-semibold text-xs">
+                <SelectTrigger className="bg-slate-900 border-slate-800 focus:ring-0 text-slate-100 text-xs rounded">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700 text-slate-100">
+                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 text-xs">
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
@@ -132,8 +127,8 @@ export default function TransactionModal({ isOpen, onClose, onSave, editingTrans
               </Select>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="date" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            <div className="space-y-1">
+              <Label htmlFor="date" className="text-xs font-medium text-slate-300">
                 Date
               </Label>
               <Input 
@@ -142,40 +137,40 @@ export default function TransactionModal({ isOpen, onClose, onSave, editingTrans
                 value={formData.date} 
                 onChange={(e) => setFormData({...formData, date: e.target.value})} 
                 required 
-                className="bg-slate-900/70 border-white/[0.08] focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500/20 text-slate-100 text-xs" 
+                className="bg-slate-900 border-slate-800 focus-visible:border-indigo-500 text-slate-100 text-xs rounded" 
               />
             </div>
           </div>
 
           {/* Recurring Toggle */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/50 border border-white/[0.05] mt-1">
+          <div className="flex items-center gap-2.5 p-2.5 rounded bg-slate-900 border border-slate-800 mt-1">
             <button
               type="button"
               onClick={() => setFormData(prev => ({...prev, isRecurring: !prev.isRecurring}))}
-              className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${formData.isRecurring ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+              className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${formData.isRecurring ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}`}
             >
-              <Repeat className={`h-4 w-4 ${formData.isRecurring ? 'animate-spin' : ''}`} style={{ animationIterationCount: 1 }} />
+              <Repeat className="h-3.5 w-3.5" />
             </button>
             <div className="flex flex-col cursor-pointer" onClick={() => setFormData(prev => ({...prev, isRecurring: !prev.isRecurring}))}>
-              <span className="text-xs font-bold text-slate-200">Recurring Transaction</span>
-              <span className="text-[11px] text-slate-400">Mark as periodic repeating income/expense</span>
+              <span className="text-xs font-medium text-slate-200">Recurring Transaction</span>
+              <span className="text-[10px] text-slate-400">Mark as periodic repeating cashflow</span>
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t border-white/[0.06] flex items-center justify-end gap-2">
+          <DialogFooter className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
             <Button 
               type="button" 
               variant="ghost" 
               onClick={onClose} 
-              className="hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold"
+              className="text-slate-400 hover:text-slate-200 text-xs font-medium h-8"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs shadow-lg shadow-indigo-500/30 border border-indigo-400/20"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-8 px-3 rounded"
             >
-              {editingTransaction ? "Save Changes" : "Create Record"}
+              {editingTransaction ? "Save Changes" : "Record Entry"}
             </Button>
           </DialogFooter>
         </form>
