@@ -27,7 +27,7 @@ export default function CategoryEnvelopesModal({
   isOpen, 
   onClose, 
   expenses = [], 
-  currencySymbol = "$", 
+  currencySymbol = "₹", 
   multiplier = 1,
   categoryBudgets,
   onUpdateCategoryBudget

@@ -25,7 +25,7 @@ export default function BudgetsView({
   setBudgetLimit,
   budgetPercent,
   totalExpense,
-  currSym = "$",
+  currSym = "₹",
   multiplier = 1,
   categoryBudgets = {},
   handleUpdateCategoryBudget,

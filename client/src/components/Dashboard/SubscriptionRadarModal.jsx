@@ -7,7 +7,7 @@ export default function SubscriptionRadarModal({
   isOpen,
   onClose,
   expenses = [],
-  currencySymbol = "$",
+  currencySymbol = "₹",
   multiplier = 1,
   onOpenAddModal
 }) {

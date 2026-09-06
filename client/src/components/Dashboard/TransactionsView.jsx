@@ -6,7 +6,7 @@ export default function TransactionsView({
   transactions = [],
   onEdit,
   onDelete,
-  currencySymbol = "$",
+  currencySymbol = "₹",
   onOpenAddModal,
   totalIncome,
   totalExpense,

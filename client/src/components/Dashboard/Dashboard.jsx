@@ -152,9 +152,17 @@ export default function Dashboard() {
     })
   }
 
-  // Budget limit & Currency state
+  // Budget limit & Currency state (INR as default)
   const [budgetLimit, setBudgetLimit] = useState(3000)
-  const [currency, setCurrency] = useState("USD")
+  const [currency, setCurrency] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem("currency")
+        if (saved) return saved
+      } catch (e) {}
+    }
+    return "INR"
+  })
   const [exchangeRate, setExchangeRate] = useState(83.50)
 
   const currencySymbols = { USD: "$", INR: "₹" }
@@ -440,6 +448,7 @@ export default function Dashboard() {
         currency={currency}
         setCurrency={(c) => {
           setCurrency(c)
+          try { localStorage.setItem("currency", c) } catch (e) {}
           addToast({ title: "Currency Changed", message: `Active display currency set to ${c}.`, type: "info" })
         }}
         currentUser={currentUser}
@@ -458,6 +467,7 @@ export default function Dashboard() {
           currency={currency}
           setCurrency={(c) => {
             setCurrency(c)
+            try { localStorage.setItem("currency", c) } catch (e) {}
             addToast({ title: "Currency Changed", message: `Switched to ${c}.`, type: "info" })
           }}
           currentUser={currentUser}
@@ -473,7 +483,10 @@ export default function Dashboard() {
             currentUser={currentUser}
             onLogout={handleLogout}
             currency={currency}
-            setCurrency={setCurrency}
+            setCurrency={(c) => {
+              setCurrency(c)
+              try { localStorage.setItem("currency", c) } catch (e) {}
+            }}
             recurringCount={recurringCount}
             goalsCount={savingsGoals.length}
           />

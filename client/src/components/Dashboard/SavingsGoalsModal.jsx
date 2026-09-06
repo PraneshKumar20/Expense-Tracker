@@ -22,7 +22,7 @@ export default function SavingsGoalsModal({
   onClose,
   savingsGoals = [],
   onUpdateGoals,
-  currencySymbol = "$",
+  currencySymbol = "₹",
   multiplier = 1
 }) {
   const [isCreating, setIsCreating] = useState(false)

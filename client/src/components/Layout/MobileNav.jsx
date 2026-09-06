@@ -30,7 +30,7 @@ export default function MobileNav({
         <div className="flex items-center gap-2">
           {/* Quick Currency Switcher */}
           <div className="flex bg-slate-900 p-0.5 rounded border border-slate-800">
-            {["USD", "INR"].map((c) => {
+            {["INR", "USD"].map((c) => {
               const active = currency === c
               return (
                 <button

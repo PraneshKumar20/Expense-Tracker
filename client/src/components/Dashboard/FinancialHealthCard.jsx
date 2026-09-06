@@ -1,7 +1,5 @@
-import { useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { ShieldCheck, ChevronRight, X, CheckCircle2, Award } from "lucide-react"
+import { useMemo } from "react"
+import { Award, Sparkles } from "lucide-react"
 import AnimatedCounter from "../ui/AnimatedCounter"
 
 export default function FinancialHealthCard({ 
@@ -9,17 +7,13 @@ export default function FinancialHealthCard({
   totalExpense, 
   budgetLimit, 
   expenses = [], 
-  currencySymbol = "$" 
+  currencySymbol = "₹" 
 }) {
-  const [isReportOpen, setIsReportOpen] = useState(false)
-
   // --- Intelligent Scoring Engine ---
   const { 
     totalScore, 
     grade, 
-    statusColor, 
     statusBg,
-    statusText,
     pillars, 
     recommendations 
   } = useMemo(() => {
@@ -65,318 +59,270 @@ export default function FinancialHealthCard({
 
     // Grade & Tiering
     let gradeLabel = "A+"
-    let color = "#10b981"
     let bg = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-    let text = "Elite Cashflow"
 
     if (finalScore >= 85) {
       gradeLabel = "A+"
-      color = "#10b981"
       bg = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-      text = "Elite Cashflow"
     } else if (finalScore >= 70) {
       gradeLabel = "B+"
-      color = "#6366f1"
       bg = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
-      text = "Strong & Stable"
     } else if (finalScore >= 50) {
       gradeLabel = "C"
-      color = "#f59e0b"
       bg = "bg-amber-500/10 border-amber-500/20 text-amber-400"
-      text = "Moderate Pace"
     } else {
       gradeLabel = "D"
-      color = "#f43f5e"
       bg = "bg-rose-500/10 border-rose-500/20 text-rose-400"
-      text = "High Burn Alert"
     }
 
-    // Pillars Breakdown
+    const netSurplus = Math.max(0, totalIncome - totalExpense)
+
+    // Pillars Breakdown matching Category Budgets structure & color palette
     const pillarList = [
       {
         name: "Savings Ratio",
-        score: savingsScore,
-        max: 35,
-        percent: Math.round((savingsScore / 35) * 100),
-        detail: `${savingsRate.toFixed(1)}% income retained`
+        scoreValue: totalIncome > 0 
+          ? `${currencySymbol}${netSurplus.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+          : `${savingsScore} pts`,
+        targetValue: totalIncome > 0 
+          ? `of ${currencySymbol}${totalIncome.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+          : `of 35 max`,
+        percent: Math.min(100, Math.max(0, savingsRate || (savingsScore / 35) * 100)),
+        detail: `${savingsRate.toFixed(0)}% retained`,
+        badgeClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        barColor: "bg-emerald-500",
+        statusLabel: savingsScore >= 28 ? "Optimal" : "Pacing",
+        statusTextClass: savingsScore >= 28 ? "text-emerald-400" : "text-amber-400"
       },
       {
         name: "Budget Buffer",
-        score: budgetScore,
-        max: 30,
-        percent: Math.round((budgetScore / 30) * 100),
-        detail: `${Math.max(0, Math.round(100 - budgetUsage))}% headroom left`
+        scoreValue: budgetLimit > 0 
+          ? `${currencySymbol}${totalExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+          : `${budgetScore} pts`,
+        targetValue: budgetLimit > 0 
+          ? `of ${currencySymbol}${budgetLimit.toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+          : `of 30 max`,
+        percent: Math.min(100, Math.max(0, budgetUsage)),
+        detail: `${Math.max(0, Math.round(100 - budgetUsage))}% headroom`,
+        badgeClass: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+        barColor: budgetScore >= 25 ? "bg-sky-500" : budgetScore >= 18 ? "bg-amber-500" : "bg-rose-500",
+        statusLabel: budgetScore >= 25 ? "Safe Limit" : budgetScore >= 18 ? "Moderate" : "Tight",
+        statusTextClass: budgetScore >= 25 ? "text-sky-400" : budgetScore >= 18 ? "text-amber-400" : "text-rose-400"
       },
       {
-        name: "Cashflow Stability",
-        score: stabilityScore,
-        max: 20,
-        percent: Math.round((stabilityScore / 20) * 100),
-        detail: hasSurplus ? "Net surplus positive" : "Deficit warning"
+        name: "Cashflow Buffer",
+        scoreValue: totalIncome > 0 || totalExpense > 0 
+          ? `${currencySymbol}${Math.abs(totalIncome - totalExpense).toLocaleString('en-US', { maximumFractionDigits: 0 })}` 
+          : `${stabilityScore} pts`,
+        targetValue: totalIncome > 0 || totalExpense > 0 
+          ? `net ${totalIncome >= totalExpense ? "surplus" : "deficit"}` 
+          : `of 20 max`,
+        percent: Math.min(100, Math.max(10, (stabilityScore / 20) * 100)),
+        detail: hasSurplus ? "Cashflow Positive" : "Deficit Warning",
+        badgeClass: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+        barColor: "bg-indigo-500",
+        statusLabel: hasSurplus ? "Stable" : "Deficit",
+        statusTextClass: hasSurplus ? "text-emerald-400" : "text-rose-400"
       },
       {
         name: "Fixed Burden",
-        score: recurringScore,
-        max: 15,
-        percent: Math.round((recurringScore / 15) * 100),
-        detail: `${recurringRatio.toFixed(0)}% recurring`
+        scoreValue: `${currencySymbol}${recurringExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+        targetValue: `of ${currencySymbol}${totalExpense.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+        percent: Math.min(100, Math.max(0, recurringRatio)),
+        detail: `${recurringRatio.toFixed(0)}% recurring`,
+        badgeClass: recurringScore >= 11 ? "bg-purple-500/10 text-purple-400 border-purple-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        barColor: recurringScore >= 11 ? "bg-purple-500" : "bg-amber-500",
+        statusLabel: recurringScore >= 11 ? "Low Burden" : "High Burn",
+        statusTextClass: recurringScore >= 11 ? "text-purple-400" : "text-amber-400"
       }
     ]
 
-    // Actionable Recommendations
+    // Actionable Recommendations matching Savings Goals style
     const recs = []
     if (recurringRatio > 35) {
       recs.push({
         title: "Audit Subscriptions",
+        category: "Recurring Liabilities",
         desc: "Fixed recurring charges take up more than 35% of outflows. Audit unused subscriptions in Bill Radar.",
-        potentialSaving: `${currencySymbol}30-80/mo`
+        potentialSaving: `${currencySymbol}30-80/mo`,
+        badgeClass: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        emoji: "📡",
+        impact: "Lower Burn"
       })
     }
     if (budgetUsage > 85) {
       recs.push({
-        title: "Pace Discretionary Spending",
-        desc: "You have utilized over 85% of your planned monthly budget limit. Consider limiting dining & entertainment.",
-        potentialSaving: `${currencySymbol}100-200`
+        title: "Pace Discretionary Spend",
+        category: "Budget Threshold",
+        desc: "You have utilized over 85% of your planned monthly budget limit. Consider limiting dining and shopping.",
+        potentialSaving: `${currencySymbol}100-200`,
+        badgeClass: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+        emoji: "⚠️",
+        impact: "Budget Safety"
       })
     }
     if (savingsRate >= 25) {
       recs.push({
         title: "High Savings Optimization",
-        desc: "Your savings rate exceeds the benchmark 20%. Allocate recurring surplus into dedicated goals or reserves.",
-        potentialSaving: "Wealth Compounder"
+        category: "Wealth Accelerator",
+        desc: "Your savings rate exceeds the benchmark 20%. Allocate recurring surplus into dedicated savings targets.",
+        potentialSaving: "Wealth Compounder",
+        badgeClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+        emoji: "💎",
+        impact: "Growth"
       })
     } else {
       recs.push({
         title: "Boost Emergency Runway",
-        desc: "Aiming for a 20% savings target creates a comfortable living expense buffer against unexpected outlays.",
-        potentialSaving: `${currencySymbol}150+/mo`
+        category: "Capital Reserve",
+        desc: "Aiming for a 20% savings target creates a comfortable living buffer against unexpected outlays.",
+        potentialSaving: `${currencySymbol}150+/mo`,
+        badgeClass: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+        emoji: "🛡️",
+        impact: "Security"
       })
     }
 
     return {
       totalScore: finalScore,
       grade: gradeLabel,
-      statusColor: color,
       statusBg: bg,
-      statusText: text,
       pillars: pillarList,
       recommendations: recs.slice(0, 3)
     }
   }, [totalIncome, totalExpense, budgetLimit, expenses, currencySymbol])
 
-  // Radial Gauge Math
-  const radius = 32
-  const circumference = 2 * Math.PI * radius
-  const strokeOffset = circumference - (totalScore / 100) * circumference
-
   return (
-    <>
-      <Card 
-        className="finance-card h-full flex flex-col justify-between cursor-pointer" 
-        onClick={() => setIsReportOpen(true)}
-      >
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-slate-200 tracking-tight flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-indigo-400" />
-              <span>Financial Health Score</span>
-            </div>
-            <span className={`text-[10px] font-mono-nums font-semibold px-2 py-0.5 rounded border ${statusBg}`}>
-              {statusText}
+    <div className="finance-card p-5 space-y-5">
+      {/* Section Header (matching Category Budgets & Savings Goals header standard) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+        <div>
+          <h2 className="text-[19px] font-bold text-white tracking-tight flex items-center gap-2">
+            <Award className="h-4 w-4 text-emerald-400" />
+            <span>4-Pillar Financial Health Audit</span>
+          </h2>
+          <p className="text-[13px] text-slate-400 font-medium mt-1">
+            Algorithmic scoring across savings rate, budget adherence, cashflow buffer, and recurring burden
+          </p>
+        </div>
+
+        {/* Health Score Summary Badge */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-slate-900/80 border border-slate-800 text-xs">
+            <span className="text-slate-400 font-medium">Health Score:</span>
+            <span className="text-white font-bold font-mono-nums">
+              <AnimatedCounter value={totalScore} decimals={0} />
             </span>
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className="space-y-3 pt-1">
-          {/* Gauge & Score Area */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="relative flex items-center justify-center">
-              <svg className="w-18 h-18 transform -rotate-90">
-                <circle
-                  cx="36"
-                  cy="36"
-                  r={radius}
-                  stroke="#1e293b"
-                  strokeWidth="6"
-                  fill="transparent"
-                />
-                <circle
-                  cx="36"
-                  cy="36"
-                  r={radius}
-                  stroke={statusColor}
-                  strokeWidth="6"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeOffset}
-                  strokeLinecap="round"
-                  fill="transparent"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-bold text-white font-mono-nums leading-none">
-                  <AnimatedCounter value={totalScore} decimals={0} />
-                </span>
-                <span className="text-[10px] text-slate-400 font-mono-nums mt-0.5">/ 100</span>
-              </div>
-            </div>
-
-            {/* Quick Metrics Column */}
-            <div className="flex-1 space-y-1 text-xs">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400 font-normal">Rating</span>
-                <span className="font-bold font-mono-nums text-xs" style={{ color: statusColor }}>
-                  Grade {grade}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400">Strongest Area</span>
-                <span className="text-slate-200 font-medium text-[11px] truncate max-w-[90px]">
-                  {pillars[0].detail}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400">Position</span>
-                <span className="text-emerald-400 font-medium text-[11px]">
-                  {totalIncome > totalExpense ? "Cashflow Positive" : "Deficit Warning"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Diagnostic Link */}
-          <div className="p-2 rounded bg-slate-900 border border-slate-800 flex items-center justify-between">
-            <p className="text-[11px] text-slate-300 font-medium truncate">
-              {recommendations[0]?.title || "Balanced spending pace"}
-            </p>
-            <span className="text-[10px] font-semibold text-indigo-400 flex items-center shrink-0 ml-2">
-              Report <ChevronRight className="h-3 w-3 ml-0.5" />
+            <span className="text-slate-500 font-mono-nums text-[11px]">/ 100</span>
+            <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border ${statusBg}`}>
+              Grade {grade}
             </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Full AI Diagnostic Report Modal */}
-      <AnimatePresence>
-        {isReportOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsReportOpen(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
-            />
+      {/* 4 Health Pillars Grid (matching Category Budgets 4-card row layout) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        {pillars.map((pillar) => (
+          <div
+            key={pillar.name}
+            className="p-3.5 rounded-lg bg-slate-900/60 border border-slate-800 space-y-2.5"
+          >
+            {/* Row 1: Category / Pillar Badge on left + Percentage on right */}
+            <div className="flex items-center justify-between">
+              <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${pillar.badgeClass}`}>
+                {pillar.name}
+              </span>
+              <span className="text-xs font-mono-nums text-slate-400">
+                {pillar.percent.toFixed(0)}%
+              </span>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 8 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 8 }}
-              transition={{ duration: 0.15 }}
-              className="relative w-full max-w-lg bg-[#0f1523] border border-slate-800 rounded-lg shadow-2xl overflow-hidden z-10 p-5 space-y-5"
+            {/* Row 2: Score + Max Limit */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline text-xs font-mono-nums">
+                <span className="text-white font-semibold">
+                  {pillar.scoreValue}
+                </span>
+                <span className="text-slate-400 text-[11px]">
+                  {pillar.targetValue}
+                </span>
+              </div>
+
+              {/* Row 3: Progress Bar matching category progress bars */}
+              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${pillar.barColor}`}
+                  style={{ width: `${pillar.percent}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Row 4: Status Detail on left + Status Assessment on right */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px]">
+              <span className="text-slate-400">
+                {pillar.detail}
+              </span>
+              <span className={`font-medium ${pillar.statusTextClass}`}>
+                {pillar.statusLabel}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Targeted Recommendations Grid (matching Savings Goals 3-card row layout) */}
+      <div className="pt-2 border-t border-slate-800/80 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              Targeted Intelligence Recommendations ({recommendations.length})
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-500 font-medium">
+            Automated ledger evaluation
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {recommendations.map((rec, idx) => (
+            <div
+              key={idx}
+              className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 space-y-3"
             >
-              {/* Modal Header */}
-              <div className="flex items-start justify-between border-b border-slate-800 pb-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-indigo-400" />
-                    <h2 className="text-base font-bold text-white tracking-tight">
-                      Financial Health Diagnostic
-                    </h2>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Synthesized from your cashflow, budgets, and recurring liabilities.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsReportOpen(false)}
-                  className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-850 transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Overall Score Badge Card */}
-              <div className="p-3.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase font-semibold text-slate-400">Composite Health Score</span>
-                  <div className="flex items-baseline gap-2 mt-0.5">
-                    <span className="text-2xl font-bold text-white font-mono">
-                      {totalScore}
-                    </span>
-                    <span className="text-xs text-slate-400">/ 100</span>
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${statusBg}`}>
-                      Grade {grade}
-                    </span>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl p-1.5 rounded bg-slate-800 border border-slate-700 shrink-0">
+                    {rec.emoji}
+                  </span>
+                  <div>
+                    <h3 className="text-xs font-semibold text-white truncate max-w-[150px]">{rec.title}</h3>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{rec.category}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-semibold text-slate-400">Status</span>
-                  <p className="text-xs font-semibold text-white mt-0.5">{statusText}</p>
-                </div>
+
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-semibold border shrink-0 ${rec.badgeClass}`}>
+                  {rec.potentialSaving}
+                </span>
               </div>
 
-              {/* 4 Health Pillars Grid */}
-              <div className="space-y-2.5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Four Health Pillars
-                </h3>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {pillars.map((pillar) => (
-                    <div key={pillar.name} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-300 font-medium">{pillar.name}</span>
-                        <span className="font-mono font-semibold text-white">{pillar.score}/{pillar.max}</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          style={{ width: `${pillar.percent}%` }}
-                          className="h-full rounded-full bg-indigo-500"
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-400">{pillar.detail}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                {rec.desc}
+              </p>
 
-              {/* Actionable Recommendations */}
-              <div className="space-y-2.5">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Targeted Recommendations
-                </h3>
-                <div className="space-y-1.5">
-                  {recommendations.map((rec, index) => (
-                    <div key={index} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
-                      <div className="flex justify-between items-start">
-                        <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                          {rec.title}
-                        </span>
-                        <span className="text-[10px] font-mono text-slate-300 px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700">
-                          {rec.potentialSaving}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 pl-5 leading-relaxed">
-                        {rec.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px]">
+                <span className="text-slate-400">
+                  Impact: <span className="font-medium text-slate-300">{rec.impact}</span>
+                </span>
+                <span className="text-emerald-400 font-medium text-[11px]">
+                  Active Advice
+                </span>
               </div>
-
-              {/* Modal Footer */}
-              <div className="pt-2 border-t border-slate-800 flex justify-end">
-                <button
-                  onClick={() => setIsReportOpen(false)}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
-                >
-                  Close Diagnostic
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }

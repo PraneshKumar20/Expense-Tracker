@@ -2,12 +2,14 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
     try{
-        const conn = await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 3000
+        });
         console.log("MongoDB connected successfully!");
     }
     catch(error){
-        console.log("MongoDB connection failed");
-        process.exit(1);
+        console.warn("⚠️  MongoDB connection failed:", error.message);
+        console.warn("ℹ️  Backend server running in offline fallback mode. Update server/.env with a MongoDB connection string when available.");
     }
 }
 

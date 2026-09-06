@@ -20,7 +20,7 @@ const CATEGORY_BADGES = {
 
 export default function SubscriptionsView({
   displayExpenses = [],
-  currencySymbol = "$",
+  currencySymbol = "₹",
   multiplier = 1,
   openAddModal
 }) {

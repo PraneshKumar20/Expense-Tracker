@@ -24,7 +24,7 @@ const CATEGORY_BADGES = {
   Other: "bg-slate-800 text-slate-400 border-slate-700"
 }
 
-export default function TransactionTable({ transactions = [], onEdit, onDelete, currencySymbol = "$" }) {
+export default function TransactionTable({ transactions = [], onEdit, onDelete, currencySymbol = "₹" }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortOrder, setSortOrder] = useState("desc")
   const [filterType, setFilterType] = useState("all")

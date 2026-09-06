@@ -17,7 +17,7 @@ export default function AnalyticsView({
   balance,
   budgetLimit,
   multiplier,
-  currencySymbol = "$",
+  currencySymbol = "₹",
   displayExpenses = [],
   savingsRate = 0,
   avgTransaction = 0,
@@ -269,25 +269,13 @@ export default function AnalyticsView({
       </div>
 
       {/* Financial Health Section */}
-      <div className="finance-card p-5">
-        <div className="mb-3">
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <Award className="h-4 w-4 text-indigo-400" />
-            <span>4-Pillar Financial Health Audit</span>
-          </h2>
-          <p className="text-xs text-slate-400 font-normal mt-0.5">
-            Algorithmic scoring across savings rate, budget adherence, cashflow buffer, and recurring burden
-          </p>
-        </div>
-
-        <FinancialHealthCard
-          totalIncome={totalIncome}
-          totalExpense={totalExpense}
-          budgetLimit={budgetLimit * multiplier}
-          expenses={displayExpenses}
-          currencySymbol={currencySymbol}
-        />
-      </div>
+      <FinancialHealthCard
+        totalIncome={totalIncome}
+        totalExpense={totalExpense}
+        budgetLimit={budgetLimit * multiplier}
+        expenses={displayExpenses}
+        currencySymbol={currencySymbol}
+      />
     </div>
   )
 }

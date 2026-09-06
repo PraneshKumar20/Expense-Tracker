@@ -11,7 +11,7 @@ const SAMPLE_PROMPTS = [
   "Electricity bill 115 bills"
 ]
 
-export default function QuickAddCommand({ isOpen, onClose, onSave, currencySymbol = "$" }) {
+export default function QuickAddCommand({ isOpen, onClose, onSave, currencySymbol = "₹" }) {
   const [query, setQuery] = useState("")
   const [justRecorded, setJustRecorded] = useState(null)
   const inputRef = useRef(null)

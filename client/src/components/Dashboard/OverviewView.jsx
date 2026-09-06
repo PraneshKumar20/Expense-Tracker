@@ -34,7 +34,7 @@ export default function OverviewView({
   balance,
   totalIncome,
   totalExpense,
-  currSym,
+  currSym = "₹",
   multiplier,
   incomeShare,
   budgetPercent,
@@ -168,120 +168,109 @@ export default function OverviewView({
           </div>
         </div>
 
-        {/* Monthly Budget Card */}
-        <div className="finance-card p-5 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-500">
-                Budget Usage
-              </span>
+        {/* Monthly Budget Usage Card - Clean, Balanced & Neat */}
+        <div className="lg:col-span-2 finance-card p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-slate-500">
+              Monthly Budget Usage
+            </span>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsEnvelopeModalOpen(true)}
-                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-2.5 py-1 rounded text-[11px] font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <Layers className="h-3 w-3" />
-                Envelopes
+                <Layers className="h-3 w-3 text-indigo-400" />
+                <span>Envelopes</span>
               </button>
+              <div className="p-1 rounded bg-slate-800 text-slate-300">
+                <Target className="h-3.5 w-3.5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <div className="text-[32px] sm:text-[40px] font-bold text-white tracking-[-0.035em] font-mono-nums leading-none">
+                <AnimatedCounter value={budgetPercent} decimals={0} suffix="%" />
+              </div>
+              <p className="text-[13px] sm:text-[14px] text-slate-400 font-medium mt-1.5 leading-relaxed">
+                {currSym}{Math.round(totalExpense).toLocaleString('en-US')} spent of {currSym}{Math.round(budgetLimit * multiplier).toLocaleString('en-US')} monthly allowance
+              </p>
             </div>
 
-            <div className="space-y-3 mt-1">
-              <div className="flex justify-between items-baseline">
-                <span className="text-[32px] sm:text-[40px] font-bold text-white font-mono-nums tracking-[-0.035em] leading-none">
-                  <AnimatedCounter value={budgetPercent} decimals={0} suffix="%" />
+            {/* Budget Progress Bar & Status */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex justify-between text-[11px] font-semibold tracking-wide">
+                <span className={budgetPercent > 90 ? "text-rose-400" : budgetPercent > 75 ? "text-amber-400" : "text-emerald-400"}>
+                  {budgetPercent > 90 ? "Budget threshold exceeded" : budgetPercent > 75 ? "Approaching threshold" : "Within budget limit"}
                 </span>
-                <span className="text-[13px] text-slate-400 font-mono-nums font-medium">
-                  of {currSym}{(budgetLimit * multiplier).toLocaleString()}
+                <span className="text-slate-400 font-mono-nums">
+                  {totalExpense <= budgetLimit * multiplier 
+                    ? `${currSym}${Math.round((budgetLimit * multiplier) - totalExpense).toLocaleString('en-US')} remaining`
+                    : `${currSym}${Math.round(totalExpense - (budgetLimit * multiplier)).toLocaleString('en-US')} over budget`}
                 </span>
               </div>
+              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${Math.min(100, budgetPercent)}%` }} 
+                  className={`h-full transition-all duration-500 ${
+                    budgetPercent > 90
+                      ? "bg-rose-500"
+                      : budgetPercent > 75
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
+                  }`} 
+                />
+              </div>
+            </div>
 
-              {/* Progress bar */}
-              <div className="space-y-1">
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    style={{ width: `${budgetPercent}%` }}
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      budgetPercent > 90
-                        ? "bg-rose-500"
-                        : budgetPercent > 75
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
-                    }`}
+            {/* Subtotals & Target Control */}
+            <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800">
+              <div>
+                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-[0.06em] flex items-center gap-1.5">
+                  {totalExpense <= budgetLimit * multiplier ? (
+                    <>
+                      <TrendingUp className="h-3.5 w-3.5 text-emerald-400" /> Remaining Buffer
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="h-3.5 w-3.5 text-rose-400" /> Budget Overrun
+                    </>
+                  )}
+                </p>
+                <p className={`text-[20px] sm:text-[24px] font-semibold font-mono-nums mt-0.5 leading-tight ${
+                  totalExpense <= budgetLimit * multiplier ? "text-emerald-400" : "text-rose-400"
+                }`}>
+                  {totalExpense <= budgetLimit * multiplier ? "+" : "-"}
+                  {currSym}{Math.round(Math.abs((budgetLimit * multiplier) - totalExpense)).toLocaleString('en-US')}
+                </p>
+              </div>
+              <div className="pl-4 border-l border-slate-800">
+                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-[0.06em] flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Target className="h-3.5 w-3.5 text-indigo-400" /> Monthly Limit
+                  </span>
+                  <button
+                    onClick={() => setActiveTab("budgets")}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 font-normal lowercase tracking-normal flex items-center gap-0.5 cursor-pointer transition-colors"
+                  >
+                    manage <ChevronRight className="h-2.5 w-2.5" />
+                  </button>
+                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-[20px] sm:text-[24px] font-semibold text-slate-300 font-mono-nums leading-tight">
+                    {currSym}
+                  </span>
+                  <input
+                    type="number"
+                    value={Number((budgetLimit * multiplier).toFixed(0))}
+                    onChange={(e) => setBudgetLimit((Number(e.target.value) || 0) / multiplier)}
+                    className="w-28 bg-transparent text-[20px] sm:text-[24px] font-semibold text-white font-mono-nums leading-tight outline-none focus:text-indigo-400 transition-colors"
                   />
                 </div>
-                {budgetPercent > 90 && (
-                  <p className="text-[11px] text-rose-400 font-medium flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3 shrink-0" /> Budget threshold exceeded
-                  </p>
-                )}
               </div>
             </div>
           </div>
-
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-            <span className="text-xs text-slate-400">Monthly Limit:</span>
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-slate-400 font-mono">{currSym}</span>
-              <input
-                type="number"
-                value={Number((budgetLimit * multiplier).toFixed(0))}
-                onChange={(e) => setBudgetLimit((Number(e.target.value) || 0) / multiplier)}
-                className="w-20 bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-xs font-mono text-white text-right outline-none focus:border-indigo-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Portals Card */}
-        <div className="finance-card p-5 flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Quick Portals
-            </span>
-            <p className="text-xs text-slate-400 mt-0.5">Jump to specific ledgers</p>
-          </div>
-
-          <div className="space-y-0.5 my-2">
-            <button
-              onClick={() => setActiveTab("transactions")}
-              className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-800/40 text-xs font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Receipt className="h-3.5 w-3.5 text-indigo-400" />
-                <span>Full Ledger</span>
-              </div>
-              <ChevronRight className="h-3.5 w-3.5 text-slate-500 opacity-50" />
-            </button>
-
-            <button
-              onClick={() => setActiveTab("budgets")}
-              className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-800/40 text-xs font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Target className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Savings Goals</span>
-              </div>
-              <ChevronRight className="h-3.5 w-3.5 text-slate-500 opacity-50" />
-            </button>
-
-            <button
-              onClick={() => setActiveTab("subscriptions")}
-              className="w-full flex items-center justify-between p-2 rounded hover:bg-slate-800/40 text-xs font-medium text-slate-300 hover:text-white transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Repeat className="h-3.5 w-3.5 text-purple-400" />
-                <span>Recurring Bills</span>
-              </div>
-              <ChevronRight className="h-3.5 w-3.5 text-slate-500 opacity-50" />
-            </button>
-          </div>
-
-          <button
-            onClick={() => setActiveTab("analytics")}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 cursor-pointer pt-1"
-          >
-            <span>View 4-Pillar Diagnostic</span>
-            <ArrowRight className="h-3 w-3" />
-          </button>
         </div>
       </div>
 
@@ -488,7 +477,7 @@ export default function OverviewView({
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-slate-200 truncate">{tx.title}</span>
                         {tx.isRecurring && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded font-semibold uppercase font-mono-nums bg-slate-800 text-slate-300 border border-slate-700">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded font-semibold uppercase bg-slate-800 text-slate-300 border border-slate-700">
                             Recurring
                           </span>
                         )}

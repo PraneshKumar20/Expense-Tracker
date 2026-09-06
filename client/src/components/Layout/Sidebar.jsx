@@ -208,7 +208,7 @@ export default function Sidebar({
         <div className="px-2.5 py-2 bg-slate-900/60 rounded-lg border border-slate-800/80 flex items-center justify-between">
           <span className="text-xs text-slate-400 font-medium">Currency</span>
           <div className="flex bg-slate-950 p-0.5 rounded border border-slate-800">
-            {["USD", "INR"].map((c) => {
+            {["INR", "USD"].map((c) => {
               const active = currency === c
               return (
                 <button
